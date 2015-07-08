@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Games{% endblock %}
+
+
+{% block content %}
+<div id="content-main">
+<h1>Games</h1>
+<ul>
+    {% for empire_name, creation_date, game in games %}
+    <li>{{empire_name}} established at <a href="{% url 'game' game=game %}">{{ creation_date }}</a>
+        <ul>
+            {% for section in sections %}
+            <li><a href="{% url 'section' game=game section=section%}">{{ section }}</a></li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
+</div>
+{% endblock %}

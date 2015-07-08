@@ -1,0 +1,26 @@
+{% extends "summary.html" %}
+
+{% block title %}Game {{ game }}{% endblock %}
+
+{% block content %}
+{{ block.super }}
+
+<table class="table table-condensed table-striped table-bordered table-hover">
+    <thead>
+    <tr>
+       <th width="10%">Turn</th>
+       <th width="50%">Added</th>
+       <th width="50%">Finished</th>
+    </tr>
+    </thead>
+    <tbody>
+{% for turn, finished, added in data %}
+    <tr>
+        <td class="text-center">Turn {{turn}}</td>
+        <td class="success"><small>{{ added|join:', ' }}</small></td>
+        <td class="warning"><small>{{ finished|join:', ' }}</small></td>
+    </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}
