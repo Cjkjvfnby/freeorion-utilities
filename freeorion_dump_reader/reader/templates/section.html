@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load items_tags %}
+
+{% block title %}{{section|title}}{% endblock %}
+{% block extrahead%}
+<link rel="stylesheet" type="text/css" href="{% static "css/table_sorter.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "css/sections.css" %}" />
+<script src="{% static "js/jquery-2.1.3.js" %}"></script>
+<script src="{% static "js/jquery.tablesorter.js" %}"></script>
+<script src="{% static "js/editor.js" %}"></script>
+{% endblock%}
+
+{% block breadcrumbs %}
+  {{block.super}}
+        / <a href="{% url 'game' game=game %}">{{ game }}</a>
+{% endblock%}
+
+{% block content %}
+
+<div id="content-main">
+    <h2>{{ section|title }}</h2>
+    {% for turn in data %}
+    <div class="turn_section">
+        <a name="{{ turn.uid }}"></a>
+        <div>
+            <span class="h4" title="{{ turn.uid }}">Turn {{ turn.turn }} <small><u><em>{{ turn.uid}}</em></u> {{ turn.data|length }} items</small></span>
+            {% if not forloop.first %}
+            <a href="#{{ turn.parent }}" class="btn btn-info btn-xs">prev</a>
+            <a href="{% url 'diff' game=game section=section turn1=turn.parent turn2=turn.uid %}" class="btn btn-info btn-xs">diff with parent</a>
+            <a href="{% url 'summary' game=game turn=turn.uid section=section %}" class="btn btn-info btn-xs">turn info</a>
+
+            {% endif %}
+        </div>
+
+        <table class="tablesorter table table-striped table-bordered table-hover table-condensed table-responsive">
+        {% for line in turn.columns %}
+        {% if forloop.first %}
+        <thead>
+        <tr>
+            {% for header, _ in line %}
+            <th>
+            {{ header|title }}
+            </th>
+            {% endfor %}
+        </tr>
+        </thead>
+
+        {% endif %}
+        <tr>
+            {% for key, value in line %}
+                <td class="{{ key }}">
+                {% if key == 'owner' %}
+                {{ value|default:""|empire_cell:empire_id }}
+                {% else %}
+                {{ value|default:""|cell:key }}
+                {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+    <br/>
+    {% endfor %}
+
+
+
+</div>
+{% endblock %}
