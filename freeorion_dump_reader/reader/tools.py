@@ -7,12 +7,15 @@ DUMP_FOLDER = 'F:/projects/freeorion/default/AI/freeorion_debug/dumps'
 _CACHE = {}
 
 
+def get_game(path):
+    empire_id, creation_date, empire_name = path.split('_', 2)
+    creation_date = datetime.fromtimestamp((int(creation_date, 16) / 1000) + 1433809768)  # revert from aistate
+    return empire_name, creation_date, path, find_branches(path)
+
 def get_games():
     games = []
-    for x in os.listdir(DUMP_FOLDER):
-        empire_id, creation_date, empire_name = x.split('_', 2)
-        creation_date = datetime.fromtimestamp((int(creation_date, 16) / 1000) + 1433809768)  # revert from aistate
-        games.append((empire_name, creation_date, x))
+    for path in os.listdir(DUMP_FOLDER):
+        games.append(get_game(path))
     return games
 
 
@@ -100,13 +103,28 @@ def get_turns(game, turn, section):
     return turns[::-1]
 
 
+def find_branches(game):
+    turn_infos = load_game_section(game, 'orders').values()
+    linked = set(x.parent for x in turn_infos)
+    return [x for x in turn_infos if x.uid not in linked]
+
+
+def get_branch(game, section, turn_uid, start=None, end=None):
+    turns = load_game_section(game, section)
+    result = [turns[turn_uid]]
+    while result[-1].parent in turns:
+        result.append(turns[result[-1].parent])
+    start = start and int(start) or 1
+    end = end and int(end) or len(result)
+    return result[::-1][start-1:end]
+
 
 def load_game_section(game, section):
     key = (game, section)
     if not key in _CACHE:
         file_path = os.path.join(DUMP_FOLDER, game, section)
         if not os.path.exists(file_path):
-            raise Http404()
+            raise Http404("Path is missed %s" % file_path)
         data = {}
         with open(file_path) as f:
             for line in f:

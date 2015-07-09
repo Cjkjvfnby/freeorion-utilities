@@ -1,9 +1,8 @@
 
-from operator import attrgetter
 from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView
 from reader.plotters import get_plotter
-from reader.tools import get_turns, get_games, load_game_section
+from reader.tools import get_turns, get_games, load_game_section, get_branch, get_game
 
 SECTIONS = ['planets', 'fleets', 'orders', 'research']
 
@@ -16,21 +15,23 @@ class GamesList(TemplateView):
         kwargs['sections'] = SECTIONS
         return super(GamesList, self).get_context_data(**kwargs)
 
-
 class GameView(TemplateView):
     template_name = "game.html"
 
     def get_context_data(self, **kwargs):
-        return super(GameView, self).get_context_data(sections=SECTIONS, **kwargs)
+        empire_name, creation_date, path, branches = get_game(kwargs['game'])
+        return super(GameView, self).get_context_data(sections=SECTIONS, empire_name=empire_name,
+                                                      creation_date=creation_date, branches=branches, **kwargs)
 
 
 class SectionView(TemplateView):
     template_name = "section.html"
 
     def get_context_data(self, **kwargs):
-        values = sorted(load_game_section(kwargs['game'], kwargs['section']).values(), key=attrgetter('turn'))
+        get_params = self.request.GET
+        branch = get_branch(kwargs['game'], kwargs['section'], kwargs['turn'], start=get_params.get('start'), end=get_params.get('end'))
         kwargs['empire_id'] = kwargs['game'].split('_', 1)[0]
-        return super(SectionView, self).get_context_data(data=values, **kwargs)
+        return super(SectionView, self).get_context_data(data=branch, **kwargs)
 
 
 class DiffView(TemplateView):
