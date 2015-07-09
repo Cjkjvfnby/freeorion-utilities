@@ -1,0 +1,12 @@
+{{empire_name}} established at <a href="{% url 'game' game=game %}">{{ creation_date }}</a>
+<ul>
+   {% for branch in branches %}
+        <li>
+            Turn {{ branch.turn }} <sup>{{ branch.get_date }}</sup>
+            {% for section in sections %}
+                <a class="btn btn-info btn-xs" href="{% url 'section' game=game section=section turn=branch.uid%}?start=1&end={{branch.turn}}">{{ section }}</a>
+            {% endfor %}
+        </li>
+   {% endfor %}
+</ul>
+
