@@ -4,16 +4,8 @@
 
 {% block content %}
 <div id="content-main">
-    <h1>Game {{ game }}</h1>
-   <ul>
-        {% for branch in branches %}
-            <li>
-                Turn ({{branch.turn}}) {{branch.uid }}
-                {% for section in sections %}
-                    <a href="{% url 'section' game=game section=section turn=branch.uid%}?start=1&end={{branch.turn}}">{{ section }}</a>
-                {% endfor %}
-            </li>
-        {% endfor %}
-    </ul>
+
+    {% include "includes/turn.html" %}
+
 </div>
 {% endblock %}

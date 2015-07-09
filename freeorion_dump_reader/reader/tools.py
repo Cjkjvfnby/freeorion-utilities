@@ -7,9 +7,14 @@ DUMP_FOLDER = 'F:/projects/freeorion/default/AI/freeorion_debug/dumps'
 _CACHE = {}
 
 
+def date_from_uid(uid):
+    # Use constant form AI state
+    return datetime.fromtimestamp((int(uid, 16) / 1000) + 1433809768)
+
+
 def get_game(path):
     empire_id, creation_date, empire_name = path.split('_', 2)
-    creation_date = datetime.fromtimestamp((int(creation_date, 16) / 1000) + 1433809768)  # revert from aistate
+    creation_date = date_from_uid(creation_date)
     return empire_name, creation_date, path, find_branches(path)
 
 def get_games():
@@ -38,6 +43,9 @@ class TurnInfo(object):
             self.columns.append([])
             for key in self.headers:
                 self.columns[-1].append((key, item.get(key)))
+
+    def get_date(self):
+        return date_from_uid(self.uid)
 
     def __repr__(self):
         return "Turn info %s" % self.uid

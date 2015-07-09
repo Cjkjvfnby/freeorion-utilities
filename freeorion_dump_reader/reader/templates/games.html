@@ -7,19 +7,12 @@
 <div id="content-main">
 <h1>Games</h1>
 <ul>
+
     {% for empire_name, creation_date, game, branches in games %}
-    <li>{{empire_name}} established at <a href="{% url 'game' game=game %}">{{ creation_date }}</a>
-        <ul>
-            {% for branch in branches %}
-                <li>
-                    Turn ({{branch.turn}}) {{branch.uid }}
-                    {% for section in sections %}
-                        <a href="{% url 'section' game=game section=section turn=branch.uid%}?start=1&end={{branch.turn}}">{{ section }}</a>
-                    {% endfor %}
-                </li>
-            {% endfor %}
-        </ul>
-    </li>
+        <li>
+        {% include "includes/turn.html" %}
+        </li>
+
     {% endfor %}
 </ul>
 </div>
