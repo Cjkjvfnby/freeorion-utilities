@@ -2,7 +2,7 @@
 from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView
 from reader.plotters import get_plotter
-from reader.tools import get_turns, get_games, load_game_section, get_branch, get_game
+from reader.models import get_turns, get_games, load_game_section, get_branch, get_game
 
 SECTIONS = ['planets', 'fleets', 'orders', 'research']
 
