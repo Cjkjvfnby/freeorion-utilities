@@ -9,6 +9,52 @@ _CACHE = {}
 
 
 class BaseModel(object):
+    section = None
+
+    @classmethod
+    def get_turns(cls, game, turn):
+        section_info = cls.load_game_section(game)
+        if turn not in section_info:
+            raise Http404('Cant find proper turn: %s' % turn)
+        last = section_info[turn]
+        turns = [last]
+        while last.parent in section_info:
+            last = section_info[last.parent]
+            turns.append(last)
+        return turns[::-1]
+
+    @classmethod
+    def find_branches(cls, game):
+        turn_infos = cls.load_game_section(game).values()
+        linked = set(x.parent for x in turn_infos)
+        return [x for x in turn_infos if x.uid not in linked]
+
+    @classmethod
+    def load_game_section(cls, game):
+        key = (game, cls.section)
+        if key not in _CACHE:
+            file_path = os.path.join(settings.DUMP_FOLDER, game, cls.section)
+            if not os.path.exists(file_path):
+                raise Http404("Path is missed %s" % file_path)
+            data = {}
+            with open(file_path) as f:
+                for line in f:
+                    line = line.strip('\n\r')
+                    turn_info = cls(game, json.loads(line))
+                    data[turn_info.uid] = turn_info
+            _CACHE[key] = data
+        return _CACHE[key]
+
+    @classmethod
+    def get_branch(cls, game, turn, start, end):
+        turns = cls.load_game_section(game)
+        result = [turns[turn]]
+        while result[-1].parent in turns:
+            result.append(turns[result[-1].parent])
+        start = start and int(start) or 1
+        end = end and int(end) or len(result)
+        return result[::-1][start-1:end]
+
     def __init__(self, game, input_data):
         """
         Convention first name in header is all ways unique key for item!!!
@@ -32,7 +78,7 @@ class BaseModel(object):
         return date_from_uid(self.uid)
 
     def __repr__(self):
-        return "Turn info %s" % self.uid
+        return "%s %s" % (self.section, self.uid)
 
     def compare(self, other):
         """
@@ -83,57 +129,30 @@ class BaseModel(object):
         return diff
 
 
-def load_game_section(game, section):
-    key = (game, section)
-    if key not in _CACHE:
-        file_path = os.path.join(settings.DUMP_FOLDER, game, section)
-        if not os.path.exists(file_path):
-            raise Http404("Path is missed %s" % file_path)
-        data = {}
-        with open(file_path) as f:
-            for line in f:
-                line = line.strip('\n\r')
-                turn_info = BaseModel(game, json.loads(line))
-                data[turn_info.uid] = turn_info
-        _CACHE[key] = data
-    return _CACHE[key]
+class Planet(BaseModel):
+    section = 'planets'
 
-def get_game(path):
-    empire_id, creation_date, empire_name = path.split('_', 2)
+
+class Fleet(BaseModel):
+    section = 'fleets'
+
+
+class Orders(BaseModel):
+    section = 'orders'
+
+
+class Research(BaseModel):
+    section = 'research'
+
+def get_game(game):
+    empire_id, creation_date, empire_name = game.split('_', 2)
     creation_date = date_from_uid(creation_date)
-    return empire_name, creation_date, path, find_branches(path)
+    return empire_name, creation_date, game, Orders.find_branches(game)
 
 def get_games():
     games = []
     for path in os.listdir(settings.DUMP_FOLDER):
         games.append(get_game(path))
     return games
-
-def get_turns(game, turn, section):
-    section_info = load_game_section(game, section)
-    if turn not in section_info:
-        raise Http404('Cant find proper turn: %s' % turn)
-    last = section_info[turn]
-    turns = [last]
-    while last.parent in section_info:
-        last = section_info[last.parent]
-        turns.append(last)
-    return turns[::-1]
-
-
-def find_branches(game):
-    turn_infos = load_game_section(game, 'orders').values()
-    linked = set(x.parent for x in turn_infos)
-    return [x for x in turn_infos if x.uid not in linked]
-
-
-def get_branch(game, section, turn_uid, start=None, end=None):
-    turns = load_game_section(game, section)
-    result = [turns[turn_uid]]
-    while result[-1].parent in turns:
-        result.append(turns[result[-1].parent])
-    start = start and int(start) or 1
-    end = end and int(end) or len(result)
-    return result[::-1][start-1:end]
 
 
