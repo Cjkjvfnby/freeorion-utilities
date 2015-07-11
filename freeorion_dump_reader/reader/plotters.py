@@ -13,19 +13,6 @@ from matplotlib.font_manager import FontProperties
 xkcd()
 
 
-def get_plotter(game, turn, section):
-    if section == 'orders':
-        return OrdersPlotter(game, turn, section)
-    elif section == 'planets':
-        return PlanetsPlotter(game, turn, section)
-    elif section == 'fleets':
-        return FleetsPlotter(game, turn, section)
-    elif section == 'research':
-        return ResearchPlotter(game, turn, section)
-    return BasePlotter(game, turn, section)
-
-
-
 def color_iterator():
     while True:
         color = 20
@@ -36,8 +23,7 @@ def color_iterator():
 
 
 class BasePlotter(object):
-    def __init__(self, game, turn, section):
-        self.turn = turn
+    def __init__(self, game, section):
         self.game = game
         self.section = section
         self.figure = figure(figsize=(12, 6))
@@ -63,7 +49,7 @@ class BasePlotter(object):
         self.axis.plot(self.x_values, y_values, label=label, **self.next_style())
         self.axis.yaxis.set_major_formatter(FormatStrFormatter('%d'))
         self.axis.yaxis.set_major_formatter(FormatStrFormatter('%d'))
-        self.axis.set_xlim(1, self.x_values[-1])
+        # self.axis.set_xlim(1, self.x_values[-1])
         # dont show float numbers on small amount of turns
         if len(self.x_values) < 10:
             xticks(self.x_values)

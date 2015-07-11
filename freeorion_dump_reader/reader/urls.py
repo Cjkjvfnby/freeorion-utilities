@@ -1,7 +1,6 @@
 from django.conf.urls import url
 
 from . import views
-from . import summaries
 
 SECTION = '(?P<section>\w+)'
 GAME = '(?P<game>\d+_[0-9a-f]+_\w+)'
@@ -16,9 +15,9 @@ def get_url(*items):
 
 urlpatterns = [
     url(r'^$', views.GamesList.as_view(), name='games'),
-    url(get_url(GAME, TURN, SECTION, 'plot.png'), views.plot, name='plot'),
+    url(get_url(GAME, SECTION, TURN, '(?P<start>\d+)', '(?P<end>\d+)', 'plot.png'), views.plot, name='plot'),
     url(get_url(GAME, SECTION, TURN), views.SectionView.as_view(), name='section'),
-    url(get_url(GAME, SECTION, TURN, 'summary'), summaries.SummaryView.as_view(), name='summary'),
+    url(get_url(GAME, SECTION, TURN, 'summary'), views.SummaryView.as_view(), name='summary'),
     url(get_url(GAME, SECTION, TURN_1, TURN_2), views.DiffView.as_view(), name='diff'),
 ]
 
