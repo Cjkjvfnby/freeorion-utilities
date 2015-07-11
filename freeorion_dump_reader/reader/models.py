@@ -8,8 +8,31 @@ from reader.tools import date_from_id
 _CACHE = {}
 
 
+class TurnEntry(dict):
+    def __init__(self, turn_model, data):
+        super(TurnEntry, self).__init__(data)
+        self.model = turn_model
+
+    def get_diff(self, other):
+        keys = set(self.keys() + other.keys())
+        this_id, other_id = self.get_id(), other.get_id()
+        diff = [('id', this_id, other_id)]
+        for key in keys:
+            this_value = self.get(key)
+            other_value = other.get(key)
+            if this_value != other_value:
+                diff.append((key, this_value, other_value))
+        if len(diff) == 1:  # only header
+            return None
+        return diff
+
+    def get_id(self):
+        raise NotImplementedError('Override in children.')
+
+
 class BaseModel(object):
     section = None
+    entry_class = TurnEntry
 
     @classmethod
     def get_turns(cls, game, turn):
@@ -59,7 +82,9 @@ class BaseModel(object):
         """
         Convention first name in header is all ways unique key for item!!!
         """
-        self.turn_info, self.data = input_data
+        self.turn_info, data = input_data
+        self.data = [self.entry_class(self, x) for x in data]
+
         self.turn = self.turn_info['turn']
         self.turn_id = self.turn_info['turn_id']
         self.parent_id = self.turn_info['parent_id']
@@ -89,74 +114,70 @@ class BaseModel(object):
              if key missed in one of items its value will be None
 
         """
-        data1 = {x['id']: x for x in self.data}
-        data2 = {x['id']: x for x in other.data}
+        data1 = {x.get_id(): x for x in self.data}
+        data2 = {x.get_id(): x for x in other.data}
         keys = set(data1.keys() + data2.keys())
         difference = []
         for key in sorted(keys):
-            diff = self._compare_items(data1.get(key), data2.get(key))
+            diff = self._compare_entries(data1.get(key), data2.get(key))
             if diff:
                 difference.append(diff)
         return difference
 
-    def _compare_items(self, this, other):
+    def _compare_entries(self, this, other):
         """
         Return list of 3 item tuples if have any differences
         In that case first tuple is unique key
         if not differences None returned.
         """
         if this is None:
-            this = {}
+            return [('id', None, other.get_id())]
         if other is None:
-            other = {}
-        keys = set(this.keys() + other.keys())
+            return [('id', this.get_id(), None)]
+        return this.get_diff(other)
 
-        this_id = self.get_id(this)
-        other_id = self.get_id(other)
-        if this_id and other_id:
-            assert this_id == other_id, 'Cant make diff for different objects'
-        diff = [('id', this_id, other_id)]
-        for key in keys:
-            this_value = this.get(key)
-            other_value = other.get(key)
-            if this_value != other_value:
-                diff.append((key, this_value, other_value))
-        if len(diff) == 1:  # only header
-            return None
-        return diff
+
+class PlanetEntry(TurnEntry):
+        def get_id(self):
+            return self.get('pid')
 
 
 class Planet(BaseModel):
     headers = ['pid', 'name', 'size', 'focus', 'sid', 'owned', 'owner', 'visibility', 'species']
     section = 'planets'
+    entry_class = PlanetEntry
 
-    def get_id(self, entry):
-        print ">", entry
-        return entry.get('pid')
+
+class FleetEntry(TurnEntry):
+    def get_id(self):
+        return self.get('fid')
 
 
 class Fleet(BaseModel):
     headers = ['fid', 'name', 'sid', 'owner', 'visibility', 'ships', 'target']
     section = 'fleets'
+    entry_class = FleetEntry
 
-    def get_id(self, entry):
-        return entry.get('fid')
 
+class OrderEntry(TurnEntry):
+    def get_id(self,):
+        return self.get('id')
 
 class Orders(BaseModel):
     headers = ['name', 'args']
     section = 'orders'
+    entry_class = OrderEntry
 
-    def get_id(self, entry):
-        return entry.get('id')
 
+class ResearchEntry(TurnEntry):
+    def get_id(self):
+        return self.get('name')
 
 class Research(BaseModel):
     headers = ['name', 'category', 'allocation', 'cost', 'turn_left', 'type']
     section = 'research'
+    entry_class = ResearchEntry
 
-    def get_id(self, entry):
-        return entry.get('name')
 
 def get_game(game):
     empire_id, creation_date, empire_name = game.split('_', 2)
