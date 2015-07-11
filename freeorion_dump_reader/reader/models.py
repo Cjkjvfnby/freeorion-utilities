@@ -99,8 +99,7 @@ class BaseModel(object):
                 difference.append(diff)
         return difference
 
-    @staticmethod
-    def _compare_items(this, other):
+    def _compare_items(self, this, other):
         """
         Return list of 3 item tuples if have any differences
         In that case first tuple is unique key
@@ -112,8 +111,8 @@ class BaseModel(object):
             other = {}
         keys = set(this.keys() + other.keys())
 
-        this_id = this.get('id')
-        other_id = other.get('id')
+        this_id = self.get_id(this)
+        other_id = self.get_id(other)
         if this_id and other_id:
             assert this_id == other_id, 'Cant make diff for different objects'
         diff = [('id', this_id, other_id)]
@@ -129,24 +128,35 @@ class BaseModel(object):
 
 class Planet(BaseModel):
     headers = ['pid', 'name', 'size', 'focus', 'sid', 'owned', 'owner', 'visibility', 'species']
-
     section = 'planets'
+
+    def get_id(self, entry):
+        print ">", entry
+        return entry.get('pid')
 
 
 class Fleet(BaseModel):
     headers = ['fid', 'name', 'sid', 'owner', 'visibility', 'ships', 'target']
-
     section = 'fleets'
+
+    def get_id(self, entry):
+        return entry.get('fid')
 
 
 class Orders(BaseModel):
     headers = ['name', 'args']
     section = 'orders'
 
+    def get_id(self, entry):
+        return entry.get('id')
+
 
 class Research(BaseModel):
     headers = ['name', 'category', 'allocation', 'cost', 'turn_left', 'type']
     section = 'research'
+
+    def get_id(self, entry):
+        return entry.get('name')
 
 def get_game(game):
     empire_id, creation_date, empire_name = game.split('_', 2)
