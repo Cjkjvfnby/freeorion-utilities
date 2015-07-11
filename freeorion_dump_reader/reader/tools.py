@@ -2,8 +2,8 @@ import json
 import os
 from datetime import datetime
 from django.http import Http404
+from django.conf import settings
 
-DUMP_FOLDER = 'F:/projects/freeorion/default/AI/freeorion_debug/dumps'
 _CACHE = {}
 
 
@@ -19,7 +19,7 @@ def get_game(path):
 
 def get_games():
     games = []
-    for path in os.listdir(DUMP_FOLDER):
+    for path in os.listdir(settings.DUMP_FOLDER):
         games.append(get_game(path))
     return games
 
@@ -130,7 +130,7 @@ def get_branch(game, section, turn_uid, start=None, end=None):
 def load_game_section(game, section):
     key = (game, section)
     if not key in _CACHE:
-        file_path = os.path.join(DUMP_FOLDER, game, section)
+        file_path = os.path.join(settings.DUMP_FOLDER, game, section)
         if not os.path.exists(file_path):
             raise Http404("Path is missed %s" % file_path)
         data = {}
