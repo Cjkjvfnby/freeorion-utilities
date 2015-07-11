@@ -1,5 +1,5 @@
 from django.views.generic import TemplateView
-from reader.models import get_turns, BaseModel
+from views import get_model_class
 
 
 
@@ -19,16 +19,15 @@ class SummaryView(TemplateView):
 
 
 def base_summary(**kwargs):
-    turns = get_turns(kwargs['game'], kwargs['turn'], kwargs['section'])
+    turns = get_model_class(kwargs['section']).get_turns(kwargs['game'], kwargs['turn'])
     return turns
 
 
 def research_summary(**kwargs):
-    turns = get_turns(kwargs['game'], kwargs['turn'], kwargs['section'])
+    turns = get_model_class(kwargs['section']).get_turns(kwargs['game'], kwargs['turn'])
     result = []
     research_in_progress = set()
     for turn in turns:
-        assert isinstance(turn, BaseModel)
         in_progress = set(x[0][1] for x in turn.columns)
         finished_this_turn = research_in_progress - in_progress
         added_this_turn = in_progress - research_in_progress
