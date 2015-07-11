@@ -4,7 +4,7 @@
         <li>
             Turn {{ branch.turn }} <sup>{{ branch.get_date }}</sup>
             {% for section in sections %}
-                <a class="btn btn-info btn-xs" href="{% url 'section' game=game section=section turn=branch.uid%}?start=1&end={{branch.turn}}">{{ section }}</a>
+                <a class="btn btn-info btn-xs" href="{% url 'section' game=game section=section turn=branch.turn_id%}?start=1&end={{branch.turn}}">{{ section }}</a>
             {% endfor %}
         </li>
    {% endfor %}

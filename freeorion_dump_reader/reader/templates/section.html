@@ -21,13 +21,13 @@
     <h2>{{ section|title }}</h2>
     {% for turn in data %}
     <div class="turn_section">
-        <a name="{{ turn.uid }}"></a>
+        <a name="{{ turn.turn_id }}"></a>
         <div>
-            <span class="h4" title="{{ turn.uid }}">Turn {{ turn.turn }} <small><u><em>{{ turn.uid}}</em></u> {{ turn.data|length }} items</small></span>
+            <span class="h4" title="{{ turn.turn_id }}">Turn {{ turn.turn }} <small><u><em>{{ turn.turn_id}}</em></u> {{ turn.data|length }} items</small></span>
             {% if not forloop.first %}
-            <a href="#{{ turn.parent }}" class="btn btn-info btn-xs">prev</a>
-            <a href="{% url 'diff' game=game section=section turn1=turn.parent turn2=turn.uid %}" class="btn btn-info btn-xs">diff with parent</a>
-            <a href="{% url 'summary' game=game turn=turn.uid section=section %}" class="btn btn-info btn-xs">turn info</a>
+            <a href="#{{ turn.parent_id }}" class="btn btn-info btn-xs">prev</a>
+            <a href="{% url 'diff' game=game section=section turn1=turn.parent_id turn2=turn.turn_id %}" class="btn btn-info btn-xs">diff with parent</a>
+            <a href="{% url 'summary' game=game turn=turn.turn_id section=section %}" class="btn btn-info btn-xs">turn info</a>
 
             {% endif %}
         </div>
