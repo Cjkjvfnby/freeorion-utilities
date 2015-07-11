@@ -1,10 +1,11 @@
-
+import os
+from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView
 from reader.plotters import get_plotter
 
 import reader.models
-from reader.models import get_games, get_game, BaseModel
+from reader.models import BaseModel, Game
 
 SECTIONS = ['planets', 'fleets', 'orders', 'research']
 
@@ -21,7 +22,7 @@ class GamesList(TemplateView):
     template_name = "games.html"
 
     def get_context_data(self, **kwargs):
-        kwargs['games'] = get_games()
+        kwargs['games'] = [Game(path) for path in os.listdir(settings.DUMP_FOLDER)]
         kwargs['sections'] = SECTIONS
         return super(GamesList, self).get_context_data(**kwargs)
 
@@ -31,7 +32,7 @@ class ModelTemplateView(TemplateView):
         kwargs = super(ModelTemplateView, self).get_context_data(**kwargs)
         self.model = get_model_class(kwargs['section'])
         self.game = kwargs['game']
-        kwargs['empire_id'] = kwargs['game'].split('_', 1)[0]
+        kwargs['empire_id'] = Game(kwargs['game']).empire_id
         return self.get_data(**kwargs)
 
 

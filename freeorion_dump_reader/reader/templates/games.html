@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load items_tags %}
 
 {% block title %}Games{% endblock %}
 
@@ -6,15 +7,15 @@
 <div id="content-main">
     <h1>Games</h1>
     <ul>
-        {% for empire_name, creation_date, game, branches in games %}
+        {% for game in games %}
             <li>
-                {{empire_name}} <sup>{{ creation_date }}</sup>
+                {% game_label game %}
                 <ul>
-                   {% for branch in branches %}
+                   {% for branch in game.branches %}
                         <li>
-                            Turn {{ branch.turn }} <sup>{{ branch.get_date }}</sup>
+                            {% turn_label branch %}
                             {% for section in sections %}
-                                <a class="btn btn-info btn-xs" href="{% url 'section' game=game section=section turn=branch.turn_id%}?start=1&end={{branch.turn}}">{{ section }}</a>
+                                <a class="btn btn-info btn-xs" href="{% url 'section' game=game.game_id section=section turn=branch.turn_id%}?start=1&end={{branch.turn}}">{{ section }}</a>
                             {% endfor %}
                         </li>
                    {% endfor %}

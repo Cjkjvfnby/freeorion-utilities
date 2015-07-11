@@ -179,15 +179,9 @@ class Research(BaseModel):
     entry_class = ResearchEntry
 
 
-def get_game(game):
-    empire_id, creation_date, empire_name = game.split('_', 2)
-    creation_date = date_from_id(creation_date)
-    return empire_name, creation_date, game, Orders.find_branches(game)
-
-def get_games():
-    games = []
-    for path in os.listdir(settings.DUMP_FOLDER):
-        games.append(get_game(path))
-    return games
-
-
+class Game(object):
+    def __init__(self, game_id):
+        self.game_id = game_id
+        self.empire_id, creation_date, self.name = game_id.split('_', 2)
+        self.creation_date = date_from_id(creation_date)
+        self.branches = Orders.find_branches(game_id)
