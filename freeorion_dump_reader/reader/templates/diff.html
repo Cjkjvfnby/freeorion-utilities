@@ -5,7 +5,6 @@
 {% block breadcrumbs %}
   {{block.super}}
         / <a href="{% url 'game' game=game %}">{{ game }}</a>
-        / <a href="{% url 'section' game=game section=section %}">{{ section|title }}</a>
 {% endblock%}
 
 {% block content %}
@@ -27,7 +26,6 @@
             {% endif %}</th>
         </tr>
         {% else %}
-
         <tr>
             <td width="10%">{{ key }}</td>
             <td width="30%">{{ first|default:""|cell:key }}</td>
