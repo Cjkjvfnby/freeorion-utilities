@@ -31,39 +31,34 @@
 
             {% endif %}
         </div>
-
         <table class="tablesorter table table-striped table-bordered table-hover table-condensed table-responsive">
-        {% for line in turn.columns %}
-        {% if forloop.first %}
-        <thead>
-        <tr>
-            {% for header, _ in line %}
-            <th>
-            {{ header|title }}
-            </th>
+            {% for line in turn.columns %}
+            {% if forloop.first %}
+            <thead>
+            <tr>
+                {% for header, _ in line %}
+                <th>
+                {{ header|title }}
+                </th>
+                {% endfor %}
+            </tr>
+            </thead>
+            {% endif %}
+            <tr>
+                {% for key, value in line %}
+                    <td class="{{ key }}">
+                    {% if key == 'owner' %}
+                    {{ value|default:""|empire_cell:empire_id }}
+                    {% else %}
+                    {{ value|default:""|cell:key }}
+                    {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
             {% endfor %}
-        </tr>
-        </thead>
-
-        {% endif %}
-        <tr>
-            {% for key, value in line %}
-                <td class="{{ key }}">
-                {% if key == 'owner' %}
-                {{ value|default:""|empire_cell:empire_id }}
-                {% else %}
-                {{ value|default:""|cell:key }}
-                {% endif %}
-                </td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+        </table>
     </div>
     <br/>
     {% endfor %}
-
-
-
 </div>
 {% endblock %}

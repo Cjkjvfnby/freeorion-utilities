@@ -2,18 +2,16 @@
 
 {% block title %}Games{% endblock %}
 
-
 {% block content %}
 <div id="content-main">
-<h1>Games</h1>
-<ul>
+    <h1>Games</h1>
+    <ul>
+        {% for empire_name, creation_date, game, branches in games %}
+            <li>
+            {% include "includes/turn.html" %}
+            </li>
 
-    {% for empire_name, creation_date, game, branches in games %}
-        <li>
-        {% include "includes/turn.html" %}
-        </li>
-
-    {% endfor %}
-</ul>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}
