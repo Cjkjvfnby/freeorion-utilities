@@ -2,7 +2,7 @@ import json
 import os
 from django.conf import settings
 from django.http import Http404
-from reader.plotters import BasePlotter, PlanetsPlotter, FleetsPlotter, OrdersPlotter, ResearchPlotter
+from reader.plotters import BasePlotter, PlanetsPlotter, FleetsPlotter, OrdersPlotter, ResearchPlotter, SystemPlotter
 from reader.tools import date_from_id
 
 
@@ -159,6 +159,18 @@ class Planet(BaseModel):
     section = 'planets'
     entry_class = PlanetEntry
     plotter_class = PlanetsPlotter
+
+
+class SystemEntry(TurnEntry):
+        def get_id(self):
+            return self.get('sid')
+
+
+class System(BaseModel):
+    headers = ['sid', 'name', 'star', 'planets', 'visibility', 'neighbors', 'tags', 'coords', 'last_battle', 'owner_tags']
+    section = 'systems'
+    entry_class = SystemEntry
+    plotter_class = SystemPlotter
 
 
 class FleetEntry(TurnEntry):

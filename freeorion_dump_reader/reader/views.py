@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 import reader.models
 from reader.models import BaseModel, Game
 
-SECTIONS = ['planets', 'fleets', 'orders', 'research']
+SECTIONS = ['systems', 'planets', 'fleets', 'orders', 'research']
 
 
 def get_model_class(name):
