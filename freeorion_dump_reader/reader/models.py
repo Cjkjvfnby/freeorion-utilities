@@ -2,7 +2,7 @@ import json
 import os
 from django.conf import settings
 from django.http import Http404
-from reader.tools import date_from_uid
+from reader.tools import date_from_id
 
 
 _CACHE = {}
@@ -18,16 +18,16 @@ class BaseModel(object):
             raise Http404('Cant find proper turn: %s' % turn)
         last = section_info[turn]
         turns = [last]
-        while last.parent in section_info:
-            last = section_info[last.parent]
+        while last.parent_id in section_info:
+            last = section_info[last.parent_id]
             turns.append(last)
         return turns[::-1]
 
     @classmethod
     def find_branches(cls, game):
         turn_infos = cls.load_game_section(game).values()
-        linked = set(x.parent for x in turn_infos)
-        return [x for x in turn_infos if x.uid not in linked]
+        linked = set(x.parent_id for x in turn_infos)
+        return [x for x in turn_infos if x.turn_id not in linked]
 
     @classmethod
     def load_game_section(cls, game):
@@ -41,7 +41,7 @@ class BaseModel(object):
                 for line in f:
                     line = line.strip('\n\r')
                     turn_info = cls(game, json.loads(line))
-                    data[turn_info.uid] = turn_info
+                    data[turn_info.turn_id] = turn_info
             _CACHE[key] = data
         return _CACHE[key]
 
@@ -49,8 +49,8 @@ class BaseModel(object):
     def get_branch(cls, game, turn, start, end):
         turns = cls.load_game_section(game)
         result = [turns[turn]]
-        while result[-1].parent in turns:
-            result.append(turns[result[-1].parent])
+        while result[-1].parent_id in turns:
+            result.append(turns[result[-1].parent_id])
         start = start and int(start) or 1
         end = end and int(end) or len(result)
         return result[::-1][start-1:end]
@@ -61,8 +61,8 @@ class BaseModel(object):
         """
         self.turn_info, self.data = input_data
         self.turn = self.turn_info['turn']
-        self.uid = self.turn_info['turn_id']
-        self.parent = self.turn_info['parent_id']
+        self.turn_id = self.turn_info['turn_id']
+        self.parent_id = self.turn_info['parent_id']
         empire_id, _, empire_name = game.split('_', 2)
         self.empire_id = empire_id
         self.empire_name = empire_name
@@ -73,10 +73,10 @@ class BaseModel(object):
                 self.columns[-1].append((key, item.get(key)))
 
     def get_date(self):
-        return date_from_uid(self.uid)
+        return date_from_id(self.turn_id)
 
     def __repr__(self):
-        return "%s %s" % (self.section, self.uid)
+        return "%s %s" % (self.section, self.turn_id)
 
     def compare(self, other):
         """
@@ -160,7 +160,7 @@ class Research(BaseModel):
 
 def get_game(game):
     empire_id, creation_date, empire_name = game.split('_', 2)
-    creation_date = date_from_uid(creation_date)
+    creation_date = date_from_id(creation_date)
     return empire_name, creation_date, game, Orders.find_branches(game)
 
 def get_games():
