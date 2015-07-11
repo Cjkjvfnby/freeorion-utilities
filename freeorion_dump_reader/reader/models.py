@@ -2,6 +2,7 @@ import json
 import os
 from django.conf import settings
 from django.http import Http404
+from reader.plotters import BasePlotter, PlanetsPlotter, FleetsPlotter, OrdersPlotter, ResearchPlotter
 from reader.tools import date_from_id
 
 
@@ -32,7 +33,14 @@ class TurnEntry(dict):
 
 class BaseModel(object):
     section = None
-    entry_class = TurnEntry
+    headers = None
+    entry_class = None
+    plotter_class = BasePlotter
+    summary_template_name = 'summary.html'
+
+    @classmethod
+    def get_plotter(cls, game):
+        return cls.plotter_class(game, cls.section)
 
     @classmethod
     def get_turns(cls, game, turn):
@@ -74,9 +82,13 @@ class BaseModel(object):
         result = [turns[turn]]
         while result[-1].parent_id in turns:
             result.append(turns[result[-1].parent_id])
-        start = start and int(start) or 1
-        end = end and int(end) or len(result)
+        start = max(start and int(start) or 1, 1)
+        end = min(end and int(end) or len(result), len(result))
         return result[::-1][start-1:end]
+
+    @classmethod
+    def get_summary(cls, game, turn, start, end):
+        cls.get_branch(game, turn, start, end)
 
     def __init__(self, game, input_data):
         """
@@ -146,6 +158,7 @@ class Planet(BaseModel):
     headers = ['pid', 'name', 'size', 'focus', 'sid', 'owned', 'owner', 'visibility', 'species']
     section = 'planets'
     entry_class = PlanetEntry
+    plotter_class = PlanetsPlotter
 
 
 class FleetEntry(TurnEntry):
@@ -157,6 +170,7 @@ class Fleet(BaseModel):
     headers = ['fid', 'name', 'sid', 'owner', 'visibility', 'ships', 'target']
     section = 'fleets'
     entry_class = FleetEntry
+    plotter_class = FleetsPlotter
 
 
 class OrderEntry(TurnEntry):
@@ -167,6 +181,7 @@ class Orders(BaseModel):
     headers = ['name', 'args']
     section = 'orders'
     entry_class = OrderEntry
+    plotter_class = OrdersPlotter
 
 
 class ResearchEntry(TurnEntry):
@@ -177,6 +192,21 @@ class Research(BaseModel):
     headers = ['name', 'category', 'allocation', 'cost', 'turn_left', 'type']
     section = 'research'
     entry_class = ResearchEntry
+    summary_template_name = 'research_summary.html'
+    plotter_class = ResearchPlotter
+
+    @classmethod
+    def get_summary(cls, game, turn, start, end):
+        turns = cls.get_branch(game, turn, start, end)
+        result = []
+        research_in_progress = set()
+        for turn in turns:
+            in_progress = set(x[0][1] for x in turn.columns)
+            finished_this_turn = research_in_progress - in_progress
+            added_this_turn = in_progress - research_in_progress
+            result.append((turn.turn, finished_this_turn, added_this_turn))
+            research_in_progress = in_progress
+        return [x for x in result if any(x[1:])]
 
 
 class Game(object):

@@ -27,7 +27,7 @@
             {% if not forloop.first %}
             <a href="#{{ turn.parent_id }}" class="btn btn-info btn-xs">prev</a>
             <a href="{% url 'diff' game=game section=section turn1=turn.parent_id turn2=turn.turn_id %}" class="btn btn-info btn-xs">diff with parent</a>
-            <a href="{% url 'summary' game=game turn=turn.turn_id section=section %}" class="btn btn-info btn-xs">turn info</a>
+            <a href="{% url 'summary' game=game turn=branch.turn_id section=section %}?start={{1}}&end={{turn.turn}}" class="btn btn-info btn-xs">turn summary</a>
 
             {% endif %}
         </div>

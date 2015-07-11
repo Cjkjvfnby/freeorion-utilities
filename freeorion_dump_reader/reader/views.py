@@ -2,7 +2,6 @@ import os
 from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView
-from reader.plotters import get_plotter
 
 import reader.models
 from reader.models import BaseModel, Game
@@ -43,6 +42,7 @@ class SectionView(ModelTemplateView):
         kwargs['data'] = self.model.get_branch(self.game, kwargs['turn'],
                                                  start=self.request.GET.get('start'),
                                                  end=self.request.GET.get('end'))
+        kwargs['branch'] = kwargs['data'][-1]
         return kwargs
 
 
@@ -59,9 +59,24 @@ class DiffView(ModelTemplateView):
         return kwargs
 
 
-def plot(request, game=None, turn=None, section=None):
-    plotter = get_plotter(game, turn, section)
-    response = HttpResponse(content_type='image/png')
+class SummaryView(ModelTemplateView):
+    template_name = "summary.html"
 
-    plotter.plot(response, get_model_class(section).get_turns(game, turn))
+    def get_data(self, **kwargs):
+        self.template_name = self.model.summary_template_name
+        kwargs['data'] = self.model.get_summary(self.game, kwargs['turn'],
+                                               start=self.request.GET.get('start'),
+                                               end=self.request.GET.get('end'))
+        kwargs['empire_id'] = Game(kwargs['game']).empire_id
+        kwargs['start'] = self.request.GET.get('start')
+        kwargs['end'] = self.request.GET.get('end')
+        return kwargs
+
+
+def plot(request, game, section, turn, start, end):
+    model = get_model_class(section)
+    plotter = model.get_plotter(game)
+    response = HttpResponse(content_type='image/png')
+    plotter.plot(response, get_model_class(section).get_branch(game, turn,
+                                                    start, end))
     return response

@@ -5,6 +5,6 @@
 {% block content %}
 <div id="content-main">
     <h2>Turn {{ turn }} summary for {{ section }}</h2>
-    <img src="{% url 'plot' game=game turn=turn section=section %}">
+    <img src="{% url 'plot' game=game turn=turn section=section start=start end=end%}">
 </div>
 {% endblock %}
