@@ -60,11 +60,9 @@ class BaseModel(object):
         Convention first name in header is all ways unique key for item!!!
         """
         self.turn_info, self.data = input_data
-        self.headers = self.turn_info.pop('headers')
-        self.headers.remove('id')
         self.turn = self.turn_info['turn']
-        self.uid = self.turn_info['turn_uid']
-        self.parent = self.turn_info['parent_uid']
+        self.uid = self.turn_info['turn_id']
+        self.parent = self.turn_info['parent_id']
         empire_id, _, empire_name = game.split('_', 2)
         self.empire_id = empire_id
         self.empire_name = empire_name
@@ -130,18 +128,24 @@ class BaseModel(object):
 
 
 class Planet(BaseModel):
+    headers = ['pid', 'name', 'size', 'focus', 'sid', 'owned', 'owner', 'visibility', 'species']
+
     section = 'planets'
 
 
 class Fleet(BaseModel):
+    headers = ['fid', 'name', 'sid', 'owner', 'visibility', 'ships', 'target']
+
     section = 'fleets'
 
 
 class Orders(BaseModel):
+    headers = ['name', 'args']
     section = 'orders'
 
 
 class Research(BaseModel):
+    headers = ['name', 'category', 'allocation', 'cost', 'turn_left', 'type']
     section = 'research'
 
 def get_game(game):
