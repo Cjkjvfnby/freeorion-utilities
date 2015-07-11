@@ -2,7 +2,7 @@
 
 ## Install
 - Install python dependencies
-  - Django==1.7.4
+  - Django==1.8.3
   - matplotlib==1.4.2
 
 - Setup path of game repo
