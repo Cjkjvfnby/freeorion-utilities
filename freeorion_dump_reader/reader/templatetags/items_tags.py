@@ -21,7 +21,7 @@ def cell(value, key):
         if not value:
             return ''
         return mark_safe(', '.join(('<small><i>%s=</i></small>%s' % (k, v) for k, v in value.items())))
-    elif key == 'ships':
+    elif key in ('ships', 'neighbors', 'tags', 'owner_tags', 'planets'):
         return ', '.join(str(x) for x in value)
     elif key == 'target':
         if not value:
@@ -37,6 +37,10 @@ def cell(value, key):
         return value[3:].lower().capitalize()
     elif key == 'owned':
         return value and 'Yes' or 'No'
+    elif key == 'coords':
+        return ', '.join('%.0f' % x for x in value)
+    elif key == 'last_battle':
+        return value if value != -65535 else ''
     return value
 
 

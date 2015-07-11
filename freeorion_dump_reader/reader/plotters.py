@@ -4,9 +4,12 @@ from collections import Counter
 import colorsys
 from itertools import cycle
 import matplotlib
+from reader.system_tools import get_data
+import networkx as nx
+
 matplotlib.use('agg')
 
-from matplotlib.pyplot import gca, FormatStrFormatter, xkcd, figure, close, xticks, grid, hist
+from matplotlib.pyplot import gca, FormatStrFormatter, xkcd, figure, close, xticks, grid, hist, axis, savefig, legend
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.font_manager import FontProperties
 
@@ -165,3 +168,44 @@ class FleetsPlotter(BasePlotter):
 class ResearchPlotter(BasePlotter):
     def get_y_label(self):
         return "research in queue"
+
+
+
+colors_to_names = {
+    '#000000': 'base',
+    '#FF0000': 'enemy',
+    '#FFFF00': 'owned by enemy',
+    '#00FF00': 'my',
+    '#CCCCCC': 'unexplored',
+    '#0000FF': 'defencive',
+    '#00FFFF': 'owned and defencive',
+    '#FF00FF': 'defencive enemy',
+}
+
+
+class SystemPlotter(BasePlotter):
+    def plot(self, response, turns):
+        graph = get_data(turns[-1].data)
+        edges = [(u, v) for (u, v) in graph.edges()]
+        pos = {n: data['position'] for n, data in graph.nodes(data=True)}  # positions for all nodes
+        colors = set(data['color'] for n, data in graph.nodes(data=True))
+        for color in colors:
+            nodes = [x[0] for x in graph.nodes(data=True) if x[1]['color'] == color]
+            nx.draw_networkx_nodes(graph, pos, node_size=100,
+                                   nodelist=nodes,
+                                   node_color=[color] * len(nodes),
+                                   label=colors_to_names[color]
+                                   )
+        # edges
+        nx.draw_networkx_edges(graph, pos, edgelist=edges, width=1, alpha=0.5, edge_color='b', style='dashed')
+        # labels
+        pos = {k: (a, b - 20) for k, (a, b) in pos.items()}
+        nx.draw_networkx_labels(graph, pos, font_size=8, font_family='Arial', labels={n: data['name'] for n, data in graph.nodes(data=True)})
+        axis('off')
+        legend()
+        savefig(response)
+
+
+
+
+
