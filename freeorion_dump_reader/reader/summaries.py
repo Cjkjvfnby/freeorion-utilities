@@ -1,5 +1,5 @@
 from django.views.generic import TemplateView
-from reader.tools import get_turns, TurnInfo
+from reader.models import get_turns, BaseModel
 
 
 
@@ -28,7 +28,7 @@ def research_summary(**kwargs):
     result = []
     research_in_progress = set()
     for turn in turns:
-        assert isinstance(turn, TurnInfo)
+        assert isinstance(turn, BaseModel)
         in_progress = set(x[0][1] for x in turn.columns)
         finished_this_turn = research_in_progress - in_progress
         added_this_turn = in_progress - research_in_progress
