@@ -2,6 +2,16 @@
 
 {% block title %}Game {{ game }}{% endblock %}
 
+{% block navbar %}
+<p class="navbar-text navbar-right">
+    {% for s in sections %}
+        {% if s != section %}
+            <a href="{% url 'section' game=game turn=turn section=s %}?start={{start}}&end={{end}}" class="navbar-link disabled">{{ s|title }}</a>
+        {% endif %}
+    {% endfor %}
+</p>
+{% endblock%}
+
 {% block content %}
 <div id="content-main">
     <h2>Turn {{ turn }} summary for {{ section }}</h2>

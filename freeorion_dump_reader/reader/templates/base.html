@@ -32,6 +32,12 @@
         {% endblock %}
     </div>
 
+    <nav class="navbar navbar-fixed-top">
+      <div class="container small">
+        {% block navbar%}{% endblock%}
+      </div>
+    </nav>
+
     {% endif %}
 
     {% block messages %}
