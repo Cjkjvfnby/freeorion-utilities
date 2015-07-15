@@ -32,6 +32,9 @@ class ModelTemplateView(TemplateView):
         self.model = get_model_class(kwargs['section'])
         self.game = kwargs['game']
         kwargs['empire_id'] = Game(kwargs['game']).empire_id
+        kwargs['sections'] = SECTIONS
+        kwargs['start'] = self.request.GET.get('start')
+        kwargs['end'] = self.request.GET.get('end')
         return self.get_data(**kwargs)
 
 
@@ -68,8 +71,6 @@ class SummaryView(ModelTemplateView):
                                                start=self.request.GET.get('start'),
                                                end=self.request.GET.get('end'))
         kwargs['empire_id'] = Game(kwargs['game']).empire_id
-        kwargs['start'] = self.request.GET.get('start')
-        kwargs['end'] = self.request.GET.get('end')
         return kwargs
 
 

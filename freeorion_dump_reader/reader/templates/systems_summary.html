@@ -1,0 +1,14 @@
+{% extends "summary.html" %}
+
+{% load staticfiles %}
+
+{% block title %}Game {{ game }}{% endblock %}
+
+
+{% block extrahead %}
+<script src="{% static "js/jquery-2.1.3.js" %}"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+<script src="{% static "js/systems.js" %}"></script>
+{% endblock %}
+

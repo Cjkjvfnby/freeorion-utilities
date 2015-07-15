@@ -171,6 +171,7 @@ class System(BaseModel):
     section = 'systems'
     entry_class = SystemEntry
     plotter_class = SystemPlotter
+    summary_template_name = 'systems_summary.html'
 
 
 class FleetEntry(TurnEntry):
