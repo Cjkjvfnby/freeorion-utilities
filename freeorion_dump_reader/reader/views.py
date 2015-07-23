@@ -43,8 +43,8 @@ class SectionView(ModelTemplateView):
 
     def get_data(self, **kwargs):
         kwargs['data'] = self.model.get_branch(self.game, kwargs['turn'],
-                                                 start=self.request.GET.get('start'),
-                                                 end=self.request.GET.get('end'))
+                                               start=self.request.GET.get('start'),
+                                               end=self.request.GET.get('end'))
         kwargs['branch'] = kwargs['data'][-1]
         return kwargs
 
@@ -68,8 +68,8 @@ class SummaryView(ModelTemplateView):
     def get_data(self, **kwargs):
         self.template_name = self.model.summary_template_name
         kwargs['data'] = self.model.get_summary(self.game, kwargs['turn'],
-                                               start=self.request.GET.get('start'),
-                                               end=self.request.GET.get('end'))
+                                                start=self.request.GET.get('start'),
+                                                end=self.request.GET.get('end'))
         kwargs['empire_id'] = Game(kwargs['game']).empire_id
         return kwargs
 
@@ -78,6 +78,8 @@ def plot(request, game, section, turn, start, end):
     model = get_model_class(section)
     plotter = model.get_plotter(game)
     response = HttpResponse(content_type='image/png')
-    plotter.plot(response, get_model_class(section).get_branch(game, turn,
-                                                    start, end))
+    plotter.plot(response, get_model_class(section).get_branch(game, turn, start, end))
     return response
+
+
+
