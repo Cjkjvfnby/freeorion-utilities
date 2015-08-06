@@ -173,6 +173,14 @@ class System(BaseModel):
     plotter_class = SystemPlotter
     summary_template_name = 'systems_summary.html'
 
+    @classmethod
+    def get_summary(cls, game, turn, start, end):
+        result = {'points': []}
+        data = cls.get_branch(game, turn, start, end)[-1]  # last turn
+        for info in data.data:
+            result['points'].append(info)
+        return result
+
 
 class FleetEntry(TurnEntry):
     def get_id(self):
