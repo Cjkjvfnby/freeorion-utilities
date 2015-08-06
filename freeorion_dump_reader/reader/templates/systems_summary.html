@@ -29,18 +29,22 @@ $(function () {
     maxZoom: 18,
 }).addTo(map);
 
+{% for starlane in data.starlanes%}
+var polyline = L.polyline({{starlane}}, {color: 'red', 'opacity': 0.5, 'lineCap':'butt', 'weight':1, 'dashArray': '3,2'}).addTo(map);
+{% endfor %}
+
 {% for system in data.points %}
-   var latlng = [{{system.coords.0}}, {{system.coords.1}}];
-   var circle = L.circle(latlng, 100, {
+   var circle = L.circle({{system.coords}}, 100, {
        color: 'red',
        fillColor: '#f03',
        fillOpacity: 0.5
    }).addTo(map);
-
-    var popup = L.popup().setContent('<p>{{system.name}} ({{system.coords.0}}, {{system.coords.1}})</p>');
+    var popup = L.popup().setContent(
+    '{% for k, v in system.items %}<p>{{k}}: {{v}}</p>{% endfor %}');
     circle.bindPopup(popup);
 {% endfor %}
-map.setView(latlng, 2)
+
+map.setView({{data.points.0.coords}}, 2)
 });
 </script>
 

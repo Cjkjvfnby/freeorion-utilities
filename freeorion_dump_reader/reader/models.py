@@ -175,10 +175,14 @@ class System(BaseModel):
 
     @classmethod
     def get_summary(cls, game, turn, start, end):
-        result = {'points': []}
+        result = {'points': [], 'starlanes': set()}
         data = cls.get_branch(game, turn, start, end)[-1]  # last turn
+        sid_map = {s['sid']: s for s in data.data}
         for info in data.data:
+            for x in info['neighbors']:
+                result['starlanes'].add(tuple(sorted((x, info['sid']))))
             result['points'].append(info)
+        result['starlanes'] = [[sid_map[a]['coords'], sid_map[b]['coords']] for a, b in result['starlanes']]
         return result
 
 
