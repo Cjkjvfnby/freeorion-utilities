@@ -1,5 +1,6 @@
 import os
 from django.conf import settings
+import json
 from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView
 
@@ -24,6 +25,41 @@ class GamesList(TemplateView):
         kwargs['games'] = [Game(path) for path in os.listdir(settings.DUMP_FOLDER)]
         kwargs['sections'] = SECTIONS
         return super(GamesList, self).get_context_data(**kwargs)
+
+
+class ResearchCompare(TemplateView):
+    template_name = "research_compare.html"
+
+    def get_context_data(self, **kwargs):
+        if self.request.GET.get('md'):
+            self.template_name = 'research_compare.md'
+
+        kwargs['games'] = [Game(path) for path in os.listdir(settings.DUMP_FOLDER)]
+        kwargs['sections'] = SECTIONS
+        game = kwargs['games'][0]
+        file_path = os.path.join(settings.DUMP_FOLDER, game.game_id, 'info')
+        if not os.path.exists(file_path):
+            raise Http404("Path is missed %s" % file_path)
+        with open(file_path) as f:
+            line = next(f).strip('\n\r')
+            turn_info = json.loads(line)[1]
+            all_techs = turn_info[0]
+        tech_stats = {tech: [] for tech in all_techs}
+        for game in kwargs['games']:
+            in_progress = set()
+            turns = sorted(reader.models.Research.load_game_section(game.game_id).values(), key=lambda x: x.turn)
+            for turn in turns:
+                names = set(x['name'] for x in turn.data)
+                new = names - in_progress
+                finished = in_progress - names
+                in_progress.update(new)
+                in_progress -= finished
+                for tech in new:
+                    tech_stats[tech].append({'started': turn.turn})
+                for tech in finished:
+                    tech_stats[tech][-1]['finished'] = turn.turn
+        kwargs['stats'] = sorted(sorted(tech_stats.items()), key=lambda x: len(x[1]), reverse=True)
+        return super(ResearchCompare, self).get_context_data(**kwargs)
 
 
 class ModelTemplateView(TemplateView):
