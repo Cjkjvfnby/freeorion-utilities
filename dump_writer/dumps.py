@@ -235,6 +235,28 @@ class DumpResearch(Dumper):
             'turn_left': element.turnsLeft
         }
 
+class DumpInfo(Dumper):
+    """
+    Dump various information once per game.
+    """
+    NAME = 'info'
+
+    def sort(self, collection):
+        pass
+
+    def construct_item(self, item):
+        return item
+
+    def get_items(self):
+        return [list(fo.techs())]
+
+    def _dump(self, section, common_info, item_list):
+        file_path = os.path.join(self.game_folder, section)
+        if not os.path.exists(file_path):
+            with open(file_path, 'a') as f:
+                f.write(json.dumps([common_info, item_list]))
+                f.write('\n')
+
 def dump_data(result):
     empire = fo.getEmpire()
     uniq_key = '%s_%s_%s' % (empire.empireID, foAI.foAIstate.uid, empire.name.replace(' ', '_'))
@@ -243,7 +265,7 @@ def dump_data(result):
         'parent_id': foAI.foAIstate.get_prev_turn_uid(),
         'turn': fo.currentTurn(),
     }
-    for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch, DumpSystems):
+    for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch, DumpSystems, DumpInfo):
         cls(uniq_key).dump(**data)
 
 
