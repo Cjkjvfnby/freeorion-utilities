@@ -1,17 +1,27 @@
 {% extends "base.html" %}
-{% load items_tags %}
+{% load staticfiles %}
 
 {% block title %}Research compare{% endblock %}
+
+{% block extrahead %}
+<link rel="stylesheet" type="text/css" href="{% static "css/table_sorter.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "css/sections.css" %}" />
+<script src="{% static "js/jquery-2.1.3.js" %}"></script>
+<script src="{% static "js/jquery.tablesorter.js" %}"></script>
+<script src="{% static "js/editor.js" %}"></script>
+{% endblock %}
 
 {% block content %}
 <div id="content-main">
     <h1>Research compare for {{game_count}} games at turn {{border}}</h1>
-    <table class="table table-striped table-bordered table-hover table-condensed table-responsive">
-        <tr>
-            <td>Tech id</td>
-            <td>Count</td>
-            <td>Turns of research</td>
-        </tr>
+    <table class="tablesorter table table-striped table-bordered table-hover table-condensed table-responsive">
+        <thead>
+            <tr>
+                <th>Tech id</th>
+                <th>Count</th>
+                <th>Turns of research</th>
+            </tr>
+        </thead>
     {% for name, stat_list in stats %}
     <tr{% if game_count == stat_list|length %} class="success"{% elif not stat_list|length %} class="warning"{% endif %}>
         <td>{{name}}</td>
