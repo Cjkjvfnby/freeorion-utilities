@@ -52,9 +52,9 @@ class ResearchCompare(TemplateView):
             turn_info = json.loads(line)[1]
             all_techs = turn_info[0]
         tech_stats = {tech: [] for tech in all_techs}
-        for turns in branches[:border]:
+        for turns in branches:
             in_progress = set()
-            for turn in turns:
+            for turn in turns[:border]:
                 names = set(x['name'] for x in turn.data)
                 new = names - in_progress
                 finished = in_progress - names
