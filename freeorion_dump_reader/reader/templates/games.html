@@ -1,11 +1,31 @@
 {% extends "base.html" %}
 {% load items_tags %}
+{% load staticfiles %}
 
 {% block title %}Games{% endblock %}
+
+{% block extrahead %}
+<script src="{% static "js/jquery-2.1.3.js" %}"></script>
+<script>
+$(function() {
+    var rc= $('.research_compare');
+    rc.click(function() {
+        var query = []
+        $('input[type=checkbox]:checked.selector').each(function() {query.push(
+        $(this).attr('class').split(/\s+/)[1]
+        )});
+        params = $.param({q: query});
+        window.open('{% url 'research_compare' %}?' + params);
+    })
+})
+
+</script>
+{% endblock %}
 
 {% block content %}
 <div id="content-main">
     <h1>Games</h1>
+    <a class="research_compare">Research compare</a>
     <ul>
         {% for game in games %}
             <li>
@@ -13,9 +33,9 @@
                 <ul>
                    {% for branch in game.branches %}
                         <li>
-                            {% turn_label branch %}
+                            <input type="checkbox" class="selector {{game.game_id}}-{{branch.turn_id}}">  {% turn_label branch %}
                             {% for section in sections %}
-                                <a class="btn btn-info btn-xs" href="{% url 'section' game=game.game_id section=section turn=branch.turn_id%}?start=1&end={{branch.turn}}">{{ section }}</a>
+                              <a class="btn btn-info btn-xs" href="{% url 'section' game=game.game_id section=section turn=branch.turn_id%}?start=1&end={{branch.turn}}">{{ section }}</a>
                             {% endfor %}
                         </li>
                    {% endfor %}

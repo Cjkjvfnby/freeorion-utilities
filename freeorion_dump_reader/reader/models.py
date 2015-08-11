@@ -82,8 +82,14 @@ class BaseModel(object):
         result = [turns[turn]]
         while result[-1].parent_id in turns:
             result.append(turns[result[-1].parent_id])
-        start = max(start and int(start) or 1, 1)
-        end = min(end and int(end) or len(result), len(result))
+        if start is None:
+            start = 1
+        else:
+            start = max(start and int(start) or 1, 1)
+        if end is None:
+            end = len(result)
+        else:
+            end = min(end and int(end) or len(result), len(result))
         return result[::-1][start-1:end]
 
     @classmethod
@@ -212,6 +218,7 @@ class Orders(BaseModel):
 class ResearchEntry(TurnEntry):
     def get_id(self):
         return self.get('name')
+
 
 class Research(BaseModel):
     headers = ['name', 'category', 'allocation', 'cost', 'turn_left', 'type']

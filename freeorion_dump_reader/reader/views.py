@@ -5,7 +5,7 @@ from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView
 
 import reader.models
-from reader.models import BaseModel, Game
+from reader.models import BaseModel, Game, Research
 
 SECTIONS = ['systems', 'planets', 'fleets', 'orders', 'research']
 
@@ -31,13 +31,17 @@ class ResearchCompare(TemplateView):
     template_name = "research_compare.html"
 
     def get_context_data(self, **kwargs):
+        games = [x.split('-') for x in self.request.GET.getlist('q[]')]
+        branches = [Research.get_branch(game, turn, None, None) for game, turn in games]
+        border = min(len(branch) for branch in branches)
+
         if self.request.GET.get('md'):
             self.template_name = 'research_compare.md'
 
-        kwargs['games'] = [Game(path) for path in os.listdir(settings.DUMP_FOLDER)]
-        kwargs['sections'] = SECTIONS
-        game = kwargs['games'][0]
-        file_path = os.path.join(settings.DUMP_FOLDER, game.game_id, 'info')
+        kwargs['game_count'] = len(branches)
+        kwargs['border'] = border
+
+        file_path = os.path.join(settings.DUMP_FOLDER, games[0][0], 'info')
         if not os.path.exists(file_path):
             raise Http404("Path is missed %s" % file_path)
         with open(file_path) as f:
@@ -45,9 +49,8 @@ class ResearchCompare(TemplateView):
             turn_info = json.loads(line)[1]
             all_techs = turn_info[0]
         tech_stats = {tech: [] for tech in all_techs}
-        for game in kwargs['games']:
+        for turns in branches[:border]:
             in_progress = set()
-            turns = sorted(reader.models.Research.load_game_section(game.game_id).values(), key=lambda x: x.turn)
             for turn in turns:
                 names = set(x['name'] for x in turn.data)
                 new = names - in_progress

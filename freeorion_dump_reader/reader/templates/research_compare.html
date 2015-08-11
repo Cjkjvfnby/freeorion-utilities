@@ -5,7 +5,7 @@
 
 {% block content %}
 <div id="content-main">
-    <h1>Techs</h1>
+    <h1>Research compare for {{game_count}} games at turn {{border}}</h1>
     <table class="table table-striped table-bordered table-hover table-condensed table-responsive">
         <tr>
             <td>Tech id</td>
@@ -13,7 +13,7 @@
             <td>Turns of research</td>
         </tr>
     {% for name, stat_list in stats %}
-    <tr{% if games|length == stat_list|length %} class="success"{% elif not stat_list|length %} class="warning"{% endif %}>
+    <tr{% if game_count == stat_list|length %} class="success"{% elif not stat_list|length %} class="warning"{% endif %}>
         <td>{{name}}</td>
         <td>{{stat_list|length}}</td>
         <td>
