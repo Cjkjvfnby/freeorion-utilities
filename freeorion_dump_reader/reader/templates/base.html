@@ -19,20 +19,16 @@
     {% if not is_popup %}
     <!-- Header -->
     <div id="header">
-        <div id="branding">
-        {% block branding %}{% endblock %}
-        </div>
-         {% block nav-global %}{% endblock %}
+        <div id="branding">{% block branding %}{% endblock %}</div>
+        {% block nav-global %}{% endblock %}
     </div>
     <!-- END Header -->
 
-    <div class="breadcrumbs small">
-        {% block breadcrumbs %}
-        <a href="{% url 'games' %}">Games</a> /
-        {% endblock %}
+    <nav class="navbar navbar-fixed-top">
+        <div class="breadcrumbs small">
+        {% block breadcrumbs %}<a href="{% url 'games' %}">Games</a> / {% endblock %}
     </div>
 
-    <nav class="navbar navbar-fixed-top">
       <div class="container small">
         {% block navbar%}{% endblock%}
       </div>
