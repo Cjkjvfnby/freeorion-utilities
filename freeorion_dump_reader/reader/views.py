@@ -22,7 +22,10 @@ class GamesList(TemplateView):
     template_name = "games.html"
 
     def get_context_data(self, **kwargs):
-        kwargs['games'] = [Game(path) for path in os.listdir(settings.DUMP_FOLDER)]
+        kwargs['games'] = sorted(
+            [Game(path) for path in os.listdir(settings.DUMP_FOLDER)],
+            key=lambda x: x.creation_date,
+            reverse=True)
         kwargs['sections'] = SECTIONS
         return super(GamesList, self).get_context_data(**kwargs)
 
