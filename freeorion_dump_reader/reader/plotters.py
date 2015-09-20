@@ -58,7 +58,7 @@ class BasePlotter(object):
             xticks(self.x_values)
         self.axis.set_ylabel(self.get_y_label(), size=16)
         self.axis.set_xlabel('turns', size=16)
-    
+
     def add_graphs(self, turns):
         y_values = [len(x.data) for x in turns]
         self.add_graph(y_values)
