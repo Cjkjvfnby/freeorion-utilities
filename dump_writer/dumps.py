@@ -271,3 +271,5 @@ def dump_data(result):
 
 from freeorion_debug.listeners import register_post_handler
 register_post_handler('generateOrders', dump_data)
+
+print "You can find dumps in %s"  % os.path.join(os.path.dirname(__file__), 'dumps')
