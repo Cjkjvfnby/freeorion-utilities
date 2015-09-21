@@ -88,4 +88,4 @@ try:
     from user_settings import *
 except ImportError:
     print 'Settings file user_settings.py is missed. Use user_settings_sample.py as template.'
-
+    exit(1)
