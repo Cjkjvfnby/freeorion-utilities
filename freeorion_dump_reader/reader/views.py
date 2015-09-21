@@ -22,6 +22,8 @@ class GamesList(TemplateView):
     template_name = "games.html"
 
     def get_context_data(self, **kwargs):
+        if not os.path.exists(settings.DUMP_FOLDER):
+            raise Http404('Dumps folder not found')
         kwargs['games'] = sorted(
             [Game(path) for path in os.listdir(settings.DUMP_FOLDER)],
             key=lambda x: x.creation_date,
