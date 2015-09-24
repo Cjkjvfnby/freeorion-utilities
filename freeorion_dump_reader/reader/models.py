@@ -114,7 +114,7 @@ class TurnEntry(dict):
         raise NotImplementedError('Override in children.')
 
 
-class BaseModel(object):
+class TurnSectionCollection(object):
     section = None
     headers = None
     entry_class = None
@@ -244,7 +244,7 @@ class PlanetEntry(TurnEntry):
             return self.get('pid')
 
 
-class Planet(BaseModel):
+class Planet(TurnSectionCollection):
     headers = ['pid', 'name', 'size', 'focus', 'sid', 'owned', 'owner', 'visibility', 'species']
     section = 'planets'
     entry_class = PlanetEntry
@@ -256,7 +256,7 @@ class SystemEntry(TurnEntry):
             return self.get('sid')
 
 
-class System(BaseModel):
+class System(TurnSectionCollection):
     headers = ['sid', 'name', 'star', 'planets', 'visibility', 'neighbors', 'tags', 'coords', 'last_battle', 'owner_tags']
     section = 'systems'
     entry_class = SystemEntry
@@ -281,7 +281,7 @@ class FleetEntry(TurnEntry):
         return self.get('fid')
 
 
-class Fleet(BaseModel):
+class Fleet(TurnSectionCollection):
     headers = ['fid', 'name', 'sid', 'owner', 'visibility', 'ships', 'target']
     section = 'fleets'
     entry_class = FleetEntry
@@ -293,7 +293,7 @@ class OrderEntry(TurnEntry):
         return self.get('id')
 
 
-class Orders(BaseModel):
+class Orders(TurnSectionCollection):
     headers = ['name', 'args']
     section = 'orders'
     entry_class = OrderEntry
@@ -305,7 +305,7 @@ class ResearchEntry(TurnEntry):
         return self.get('name')
 
 
-class Research(BaseModel):
+class Research(TurnSectionCollection):
     headers = ['name', 'category', 'allocation', 'cost', 'turn_left', 'type']
     section = 'research'
     entry_class = ResearchEntry

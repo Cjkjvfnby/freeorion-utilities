@@ -5,7 +5,7 @@ from django.http import Http404, HttpResponse
 from django.views.generic import TemplateView
 
 import reader.models
-from reader.models import BaseModel, Game, Research
+from reader.models import TurnSectionCollection, Game, Research
 
 SECTIONS = ['systems', 'planets', 'fleets', 'orders', 'research']
 
@@ -13,7 +13,7 @@ SECTIONS = ['systems', 'planets', 'fleets', 'orders', 'research']
 def get_model_class(name):
     for attr_name in dir(reader.models):
         attr = getattr(reader.models, attr_name)
-        if isinstance(attr, type) and issubclass(attr, BaseModel) and attr.section == name:
+        if isinstance(attr, type) and issubclass(attr, TurnSectionCollection) and attr.section == name:
             return attr
     raise Exception('Model %s not found' % name)
 
