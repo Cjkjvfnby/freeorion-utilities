@@ -9,6 +9,89 @@ from reader.tools import date_from_id
 _CACHE = {}
 
 
+class LineEntry(object):
+    """
+    Generate html entry for single line
+    """
+
+    def process_args(self, value):
+        return ', '.join(('<small><i>%s=</i></small>%s' % (k, v) for k, v in value.items()))
+
+    def process_list(self, value):
+        return ', '.join(str(x) for x in value)
+
+    def process_target(self, value):
+        if not value:
+            return 'no mission'
+        mission_type, target_id, target_type, target_name = value
+        if mission_type == 'None':
+            return "mission with out targets"
+        return "%s: %s %s(%s)" % (mission_type, target_type, target_name, target_id)
+
+    def process_focus(self, value):
+        return value[6:].lower().capitalize()
+
+    def process_species(self, value):
+        return value[3:].lower().capitalize()
+
+    def process_owned(self, value):
+        return value and 'Yes' or 'No'
+
+    def process_coords(self, value):
+        return ', '.join('%.0f' % x for x in value)
+
+    def process_last_battle(self, value):
+        return value if value != -65535 else ''
+
+    def process_owner(self, value):
+        if value == -1:
+            return 'monster'
+        elif int(self.turn.empire_id) == value:
+            return 'me'
+        else:
+            return value
+
+    def __init__(self, name, item, turn):
+        self.turn = turn
+        self.VALUE_METHOD_MAP = {}
+        self.VALUE_PROCESS_MAP = {'args': self.process_args,
+                                  'ships': self.process_list,
+                                  'neighbors': self.process_list,
+                                  'tags': self.process_list,
+                                  'owner_tags': self.process_list,
+                                  'planets': self.process_list,
+                                  'target': self.process_target,
+                                  'focus': self.process_focus ,
+                                  'species': self.process_species,
+                                  'owned': self.process_owned,
+                                  'coords': self.process_coords,
+                                  'last_battle': self.process_last_battle,
+                                  'owner': self.process_owner,
+                                  }
+
+
+        self.header = name
+        self.classes = self.get_classes(item)
+        self.html = self.get_html(item)
+
+    def get_classes(self, item):
+        return self.header
+
+    def get_html(self, item):
+        template = u'''<td class="{}">{}</td>'''
+
+        value = item.get(self.header)
+        if value is None:
+            return template.format(self.header, '')
+
+        if self.header in self.VALUE_METHOD_MAP:
+            return template.format(self.header, self.VALUE_METHOD_MAP[self.header](item))
+        else:
+            if self.header in self.VALUE_PROCESS_MAP:
+                return template.format(self.header, self.VALUE_PROCESS_MAP[self.header](value))
+        return template.format(self.header, value)
+
+
 class TurnEntry(dict):
     def __init__(self, turn_model, data):
         super(TurnEntry, self).__init__(data)
@@ -110,10 +193,11 @@ class BaseModel(object):
         self.empire_id = empire_id
         self.empire_name = empire_name
         self.columns = []
+
         for item in self.data:
             self.columns.append([])
             for key in self.headers:
-                self.columns[-1].append((key, item.get(key)))
+                self.columns[-1].append(LineEntry(key, item, self))
 
     def get_date(self):
         return date_from_id(self.turn_id)

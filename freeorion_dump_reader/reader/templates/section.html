@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% load items_tags %}
 
 {% block title %}{{section|title}}{% endblock %}
 {% block extrahead%}
@@ -47,23 +46,17 @@
             {% if forloop.first %}
             <thead>
             <tr>
-                {% for header, _ in line %}
+                {% for entry in line %}
                 <th>
-                {{ header|title }}
+                {{ entry.header|title }}
                 </th>
                 {% endfor %}
             </tr>
             </thead>
             {% endif %}
             <tr>
-                {% for key, value in line %}
-                    <td class="{{ key }}">
-                    {% if key == 'owner' %}
-                    {{ value|default:""|empire_cell:empire_id }}
-                    {% else %}
-                    {{ value|default:""|cell:key }}
-                    {% endif %}
-                    </td>
+                {% for entry in line %}
+                    {{ entry.html|safe }}
                 {% endfor %}
             </tr>
             {% endfor %}
