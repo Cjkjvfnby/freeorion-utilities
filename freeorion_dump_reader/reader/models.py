@@ -4,6 +4,7 @@ from django.conf import settings
 from django.http import Http404
 from reader.plotters import BasePlotter, PlanetsPlotter, FleetsPlotter, OrdersPlotter, ResearchPlotter, SystemPlotter
 from reader.tools import date_from_id
+from reader.base_models import Model
 
 
 _CACHE = {}

@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 
 import reader.models
 from reader.models import TurnSectionCollection, Game, Research
+from reader.db import db
 
 SECTIONS = ['systems', 'planets', 'fleets', 'orders', 'research']
 
@@ -24,11 +25,9 @@ class GamesList(TemplateView):
     def get_context_data(self, **kwargs):
         if not os.path.exists(settings.DUMP_FOLDER):
             raise Http404('Dumps folder not found')
-        kwargs['games'] = sorted(
-            [Game(path) for path in os.listdir(settings.DUMP_FOLDER)],
-            key=lambda x: x.creation_date,
-            reverse=True)
+        kwargs['games'] = db.get_games()
         kwargs['sections'] = SECTIONS
+
         return super(GamesList, self).get_context_data(**kwargs)
 
 
