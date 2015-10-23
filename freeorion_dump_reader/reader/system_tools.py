@@ -1,8 +1,5 @@
-
 import networkx as nx
 import operator
-
-
 
 
 def find_defensive_positions(G, node_values, owned_nodes, enemy_nodes, unexplored_nodes, all_defensive_positions):
@@ -72,7 +69,6 @@ def define_graph(data, enemy_nodes, owned_nodes, unexplored_nodes, all_defensive
     return g
 
 
-
 def make_data(systems):
     used_relations = set()
     nodes = set()
@@ -90,7 +86,6 @@ def make_data(systems):
         'nodes': nodes,
         'edges': used_relations,
     }
-
 
 
 def get_data(systems):
@@ -113,4 +108,3 @@ def get_data(systems):
     # print profiling output and plot the graph
     G = define_graph(data, enemy_nodes, owned_nodes, unexplored_nodes, all_defensive_positions)
     return G
-

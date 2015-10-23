@@ -6,7 +6,7 @@
 <p class="navbar-text navbar-right">
     {% for s in sections %}
         {% if s != section %}
-            <a href="{% url 'summary' game=game turn=turn section=s %}?start={{start}}&end={{end}}" class="navbar-link disabled">{{ s|title }}</a>
+            <a href="{% url 'summary' game=game.game_id turn=turn section=s %}?start={{start}}&end={{end}}" class="navbar-link disabled">{{ s|title }}</a>
         {% endif %}
     {% endfor %}
 </p>
@@ -15,6 +15,6 @@
 {% block content %}
 <div id="content-main">
     <h2>Turn {{ turn }} summary for {{ section }}</h2>
-    <img src="{% url 'plot' game=game turn=turn section=section start=start end=end%}">
 </div>
 {% endblock %}
+

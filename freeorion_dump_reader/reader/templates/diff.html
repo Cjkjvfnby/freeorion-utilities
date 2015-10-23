@@ -11,25 +11,32 @@
     <h2>Compare {{ turn1 }} and {{ turn2 }} of {{ section }}</h2>
     {% for item in diff %}
     <table width="50%" class="table table-striped table-bordered table-hover table-condensed table-responsive">
-        {% for key, first, second in item %}
-        {% if forloop.first %}
-        <tr>
-            <th colspan="3" class={% if first == second %}
-                "warning">{{ key }} {{ first }} was changed
-            {% elif not first %}
-                "success">{{ key }} {{ second }} was added
-            {% else %}
-                "danger">{{ key }} {{ first }} was removed
-            {% endif %}</th>
-        </tr>
-        {% else %}
-        <tr>
-            <td width="10%">{{ key }}</td>
-            <td width="30%">{{ first|default:""|cell:key }}</td>
-            <td width="30%">{{ second|default:""|cell:key }}</td>
-        </tr>
-        {% endif %}
-        {% endfor %}
+        {% if item|length ==  1 %}
+            <tr>
+               <th class={% if not item.0.1 %}
+                            "success"> {{ key }} {{ item.0.2 }} was added
+                         {% else %}
+                            "danger">{{ key }} {{ item.0.1 }} was removed
+                {% endif %}
+                </th>
+            </tr>
+        {%else%}
+            {% for key, first, second in item %}
+                {% if forloop.first %}
+                    <tr>
+                       <th colspan="3" class="warning">
+                           {{ key }} {{ first }} was changed
+                        </th>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td width="10%">{{ key }}</td>
+                        <td width="30%">{{ first|default:""}}</td>
+                        <td width="30%">{{ second|default:""}}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        {% endif%}
     </table>
     {% empty %}
         Content is same.

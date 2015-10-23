@@ -16,7 +16,7 @@ def get_url(*items):
 urlpatterns = [
     url(r'^$', views.GamesList.as_view(), name='games'),
     url(r'^research_compare$', views.ResearchCompare.as_view(), name='research_compare'),
-    url(get_url(GAME, SECTION, TURN, '(?P<start>\d+)', '(?P<end>\d+)', 'plot.png'), views.plot, name='plot'),
+    # url(get_url(GAME, SECTION, TURN, '(?P<start>\d+)', '(?P<end>\d+)', 'plot.png'), views.plot, name='plot'),
     url(get_url(GAME, SECTION, TURN), views.SectionView.as_view(), name='section'),
     url(get_url(GAME, SECTION, TURN, 'summary'), views.SummaryView.as_view(), name='summary'),
     url(get_url(GAME, SECTION, TURN_1, TURN_2), views.DiffView.as_view(), name='diff'),

@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% load items_tags %}
 
 {% block title %}{{section|title}}{% endblock %}
 {% block extrahead%}
@@ -19,57 +18,44 @@
 <p class="navbar-text navbar-right">
     {% for s in sections %}
         {% if s != section %}
-            <a href="{% url 'section' game=game turn=branch.turn_id section=s %}?start={{start}}&end={{end}}" class="navbar-link disabled">{{ s|title }}</a>
+            <a href="{% url 'section' game=game.game_id turn=turn section=s %}?start={{start}}&end={{end}}" class="navbar-link disabled">{{ s|title }}</a>
         {% endif %}
     {% endfor %}
 </p>
 {% endblock%}
 
-
 {% block content %}
 
 <div id="content-main">
     <h2>{{ section|title }}</h2>
-    {% for turn in data %}
     <div class="turn_section">
-        <a name="{{ turn.turn_id }}"></a>
-        <div>
-            <span class="h4" title="{{ turn.turn_id }}">Turn {{ turn.turn }} <small><u><em>{{ turn.turn_id}}</em></u> {{ turn.data|length }} items</small></span>
-            {% if not forloop.first %}
+    {% for turn in data %}
+        <span class="h4" title="{{ turn.turn_id }}">Turn {{ turn.turn }} <small><u><em>{{ turn.turn_id}}</em></u> {{ turn.data|length }} items</small></span>
+        {% if not forloop.first %}
             <a href="#{{ turn.parent_id }}" class="btn btn-info btn-xs">prev</a>
-            <a href="{% url 'diff' game=game section=section turn1=turn.parent_id turn2=turn.turn_id %}" class="btn btn-info btn-xs">diff with parent</a>
-            <a href="{% url 'summary' game=game turn=branch.turn_id section=section %}?start={{1}}&end={{turn.turn}}" class="btn btn-info btn-xs">turn summary</a>
+            <a href="{% url 'diff' game=game.game_id section=section turn1=turn.parent_id turn2=turn.turn_id %}" class="btn btn-info btn-xs">diff with parent</a>
+            <a href="{% url 'summary' game=game.game_id turn=turn.turn_id section=section %}?start={{1}}&end={{turn.turn}}" class="btn btn-info btn-xs">turn summary</a>
+        {% endif %}
 
-            {% endif %}
-        </div>
         <table class="tablesorter table table-striped table-bordered table-hover table-condensed table-responsive">
-            {% for line in turn.columns %}
-            {% if forloop.first %}
-            <thead>
+        <thead>
             <tr>
-                {% for header, _ in line %}
-                <th>
-                {{ header|title }}
-                </th>
+                {% for field in headers %}
+                    <th>{{ field.name|title }}</th>
                 {% endfor %}
             </tr>
-            </thead>
-            {% endif %}
+        </thead>
+
+        {% for entry in turn %}
             <tr>
-                {% for key, value in line %}
-                    <td class="{{ key }}">
-                    {% if key == 'owner' %}
-                    {{ value|default:""|empire_cell:empire_id }}
-                    {% else %}
-                    {{ value|default:""|cell:key }}
-                    {% endif %}
-                    </td>
+                {% for field in entry.fields %}
+                    <td>{{ field.get_html|safe }}</td>
                 {% endfor %}
             </tr>
-            {% endfor %}
+        {% endfor %}
         </table>
+    {% endfor %}
     </div>
     <br/>
-    {% endfor %}
 </div>
 {% endblock %}
