@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load items_tags %}
+{% load staticfiles %}
+{% block title %}Games{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <a class="btn btn-info btn-xs" href="{% url 'import_list' %}">import</a>
+
+    <h1>Games</h1>
+    <a class="research_compare">Research compare</a>
+    <ul>
+
+
+        {% for game in object_list %}
+        <p><span>{{game.empire_name}}<small> [{{game.game_id}}] </small><sup>{{game.creation_date}}</sup></span></p>
+
+            <li>
+                <ul>
+
+
+                    {% for end in game.get_ends %}
+                    <li>{{end}}</li>
+
+                    {% comment %}
+                        <li>
+                            <input type="checkbox" class="selector {{game.game_id}}-{{branch.turn_id}}">  {% turn_label branch %}
+                            {% for section in sections %}
+                                <a class="btn btn-info btn-xs" href="{% url 'section' game=game.game_id section=section turn=branch.turn_id%}?start=1&end={{branch.turn}}">{{ section }}</a>
+                            {% endfor %}
+                        </li>
+                   {% endcomment %}
+                   {% endfor %}
+
+                </ul>
+            </li>
+
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

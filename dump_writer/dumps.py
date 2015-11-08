@@ -1,4 +1,5 @@
 import os
+from subprocess import PIPE, Popen
 import sys
 import json
 from EnumsAI import AIFleetMissionType
@@ -269,7 +270,21 @@ def dump_data(result):
         cls(uniq_key).dump(**data)
 
 
+
+def send_data(data):
+    process = Popen(['python', 'F:/projects/freeorion/stub.py'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    res = process.communicate("hello")
+    print '1', res
+
+    process = Popen(['python', 'F:/projects/freeorion/stub.py'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    res = process.communicate("hello2")
+    print '2', res
+
+
+
 from freeorion_debug.listeners import register_post_handler
 register_post_handler('generateOrders', dump_data)
 
 print "You can find dumps in %s"  % os.path.join(os.path.dirname(__file__), 'dumps')
+
+

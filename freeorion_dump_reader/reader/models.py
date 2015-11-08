@@ -1,71 +1,101 @@
-from reader.fields import (NumberField, StringField, TurnField, ListField, CoordinatesField,
-                           BooleanField, TargetField, MapField, OwnerField)
-from reader.base_models import Model
+from django.db import models
 
 
-class PlanetModel(Model):
-    SECTION = 'planets'
-    pid = NumberField()
-    name = StringField()
-    size = NumberField()
-    focus = StringField(preprocess=lambda x: x[6:].lower().capitalize())
-    sid = NumberField()
-    owned = BooleanField()
-    visisbility = StringField()
-    species = StringField(preprocess=lambda x: x[3:].lower().capitalize())
+class Game(models.Model):
+    game_id = models.CharField(max_length=256, primary_key=True)
+    empire_name = models.CharField(max_length=256)
+    creation_date = models.DateTimeField()
+    empire_id = models.IntegerField()
 
-    def get_key(self):
-        return self.pid
+    class Meta:
+        ordering = ['-creation_date', 'empire_name']
+
+    def __unicode__(self):
+        return 'Game(%s) at %s' % (self.empire_name, self.creation_date)
 
 
-class SystemModel(Model):
-    SECTION = 'systems'
-    sid = NumberField()
-    name = StringField()
-    star = StringField()
-    planets = ListField()
-    visibility = StringField()
-    neighbors = ListField()
-    tags = ListField()
-    coords = CoordinatesField()
-    last_battle = TurnField()
-    owner_tags = ListField()
-
-    def get_key(self):
-        return self.sid
+    def get_ends(self):
+        turns = self.turn_set.all()
+        linked = set(x.parent_id for x in turns)
+        return (x for x in turns if x.turn_id not in linked)
 
 
-class FleetModel(Model):
-    SECTION = 'fleets'
-    fid = NumberField()
-    name = StringField()
-    sid = NumberField()
-    owner = OwnerField()
-    visibility = StringField()
-    ships = ListField()
-    target = TargetField()
+class Turn(models.Model):
+    turn = models.IntegerField()
+    game = models.ForeignKey(Game)
+    turn_id = models.CharField(max_length=256, primary_key=True)
+    parent_id = models.CharField(max_length=256, blank=True, null=True)
 
-    def get_key(self):
-        return self.fid
+    def __unicode__(self):
+        return 'Turn %s' % self.turn
 
 
-class OrderModel(Model):
-    SECTION = 'orders'
-    name = StringField()
-    args = MapField()
+class Planet(models.Model):
+    pid = models.IntegerField()
+    name = models.CharField(max_length=256)
+    size = models.CharField(max_length=256)  # Change to choices
+    focus = models.CharField(max_length=256)
+    sid = models.IntegerField()
+    owned = models.BooleanField()
+    visibility = models.CharField(max_length=256)
+    species = models.CharField(max_length=256)
+    owner = models.CharField(max_length=256, null=True, blank=True)
+    turn = models.ForeignKey(Turn)
 
-    def get_key(self):
-        return '%s: %s' % (self.name, ', '.join('%s:%s' % x for x in sorted(self. args.items())))
+    class meta:
+        unique_together = (('pid', 'turn'),)
 
 
-class ResearchModel(Model):
-    SECTION = 'research'
-    name = StringField()
-    category = StringField()
-    allocation = StringField()
-    cost = NumberField()
-    turn_left = NumberField()
-    type = StringField()
-
-    def get_key(self):
-        return self.name
+#
+#
+# class SystemModel(Model):
+#     SECTION = 'systems'
+#     sid = NumberField()
+#     name = StringField()
+#     star = StringField()
+#     planets = ListField()
+#     visibility = StringField()
+#     neighbors = ListField()
+#     tags = ListField()
+#     coords = CoordinatesField()
+#     last_battle = TurnField()
+#     owner_tags = ListField()
+#
+#     def get_key(self):
+#         return self.sid
+#
+#
+# class FleetModel(Model):
+#     SECTION = 'fleets'
+#     fid = NumberField()
+#     name = StringField()
+#     sid = NumberField()
+#     owner = OwnerField()
+#     visibility = StringField()
+#     ships = ListField()
+#     target = TargetField()
+#
+#     def get_key(self):
+#         return self.fid
+#
+#
+# class OrderModel(Model):
+#     SECTION = 'orders'
+#     name = StringField()
+#     args = MapField()
+#
+#     def get_key(self):
+#         return '%s: %s' % (self.name, ', '.join('%s:%s' % x for x in sorted(self. args.items())))
+#
+#
+# class ResearchModel(Model):
+#     SECTION = 'research'
+#     name = StringField()
+#     category = StringField()
+#     allocation = StringField()
+#     cost = NumberField()
+#     turn_left = NumberField()
+#     type = StringField()
+#
+#     def get_key(self):
+#         return self.name

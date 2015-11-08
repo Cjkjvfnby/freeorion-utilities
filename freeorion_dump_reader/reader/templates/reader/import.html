@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}Import games{% endblock %}
+
+{% block content %}
+<div id="content-main">
+<ul>
+    {% for game, path in games %}
+    <li>
+    <form action="/import/" method="POST">
+        <input type="hidden" value="{{path}}" name="path">
+        <input type="submit" value="import {{game}}">
+    </form>
+    </li>
+
+    {% endfor %}
+</ul>
+
+</div>
+{% endblock %}

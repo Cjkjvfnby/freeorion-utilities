@@ -1,48 +1,33 @@
-{% load admin_static %}{% load firstof from future %}<!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:"en-us" }}">
+{% load staticfiles %}{% load firstof from future %}
+<!DOCTYPE html>
+<html lang="en-us"">
 <head>
 <title>{% block title %}{% endblock %}</title>
 <link href="{% static "css/bootstrap.css"%}" rel="stylesheet">
 {% block extrastyle %}{% endblock %}
-
-
 {% block extrahead %}{% endblock %}
-{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+<meta name="robots" content="NONE,NOARCHIVE" />
 </head>
-{% load i18n %}
-
-<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
 
 <!-- Container -->
 <div id="container" class="container-fluid">
-
-    {% if not is_popup %}
-    <!-- Header -->
     <div id="header">
-        <div id="branding">{% block branding %}{% endblock %}</div>
         {% block nav-global %}{% endblock %}
     </div>
-    <!-- END Header -->
 
+    {% comment %}
     <nav class="navbar navbar-fixed-top">
         <div class="breadcrumbs small">
         {% block breadcrumbs %}<a href="{% url 'games' %}">Games</a> / {% endblock %}
     </div>
 
+
       <div class="container small">
         {% block navbar%}{% endblock%}
       </div>
     </nav>
+    {% endcomment %}
 
-    {% endif %}
-
-    {% block messages %}
-        {% if messages %}
-        <ul class="messagelist">{% for message in messages %}
-          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
-        {% endfor %}</ul>
-        {% endif %}
-    {% endblock messages %}
 
     <!-- Content -->
     <div id="content" class="{% block coltype %}colM{% endblock %}">
