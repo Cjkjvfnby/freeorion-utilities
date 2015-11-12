@@ -1,16 +1,11 @@
 import json
 import os
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.base import ContextMixin
-
+from django.http import HttpResponseRedirect
 from reader.models import Turn, Planet, Game
 
-from django.views.generic import TemplateView, FormView, ListView, View
+from django.views.generic import TemplateView, ListView, View
 from django.conf import settings
-
-from django import forms
 from reader.tools import date_from_id
 
 
@@ -30,13 +25,15 @@ class ImportListView(TemplateView):
         games = sorted([os.path.join(settings.DUMP_FOLDER, path) for path in os.listdir(settings.DUMP_FOLDER) if is_dump(path)],
                        key=os.path.getctime, reverse=True)
 
-        context['games'] = [(os.path.basename(x), x) for x in games]
+        ids = [os.path.basename(path) for path in games]
+        present = Game.objects.all().in_bulk(ids)
+        context['games'] = [(game_id, game_id in present, path) for game_id, path in zip(ids, games)]
         return context
 
 
 class ImportView(View):
     @transaction.atomic
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         folder = request.POST['path']
         game_id = os.path.basename(folder)
 
@@ -58,15 +55,3 @@ class ImportView(View):
                 for item in items:
                     Planet.objects.get_or_create(turn=turn, **item)
         return HttpResponseRedirect('/')
-
-
-
-
-
-
-
-
-#
-#
-
-

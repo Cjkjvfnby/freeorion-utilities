@@ -13,7 +13,6 @@ class Game(models.Model):
     def __unicode__(self):
         return 'Game(%s) at %s' % (self.empire_name, self.creation_date)
 
-
     def get_ends(self):
         turns = self.turn_set.all()
         linked = set(x.parent_id for x in turns)
@@ -23,8 +22,11 @@ class Game(models.Model):
 class Turn(models.Model):
     turn = models.IntegerField()
     game = models.ForeignKey(Game)
-    turn_id = models.CharField(max_length=256, primary_key=True)
+    turn_id = models.CharField(max_length=256)
     parent_id = models.CharField(max_length=256, blank=True, null=True)
+
+    class Meta:
+        unique_together = (("game", "turn_id"),)
 
     def __unicode__(self):
         return 'Turn %s' % self.turn

@@ -4,18 +4,19 @@
 {% block title %}Import games{% endblock %}
 
 {% block content %}
-<div id="content-main">
-<ul>
-    {% for game, path in games %}
-    <li>
-    <form action="/import/" method="POST">
-        <input type="hidden" value="{{path}}" name="path">
-        <input type="submit" value="import {{game}}">
-    </form>
-    </li>
-
+<div id="container-fluid">
+    {% for game_id, present, path in games %}
+    <div class="row">
+        <form action="/import/" method="POST">
+            <input type="hidden" value="{{path}}" name="path">
+            <div class="col-md-3">
+                {{game_id}}
+            </div>
+            <div class="col-md-1">
+                 <input type="submit" value="{% if present %}update {% else %}import {% endif %}">
+            </div>
+        </form>
+    </div>
     {% endfor %}
-</ul>
-
 </div>
 {% endblock %}
