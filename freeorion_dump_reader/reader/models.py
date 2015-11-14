@@ -48,11 +48,14 @@ class Planet(models.Model):
         unique_together = (('pid', 'turn'),)
 
 
+VISIBILITY = tuple((x, x) for x in ('partial', 'full', 'none'))
+
+
 class System(models.Model):
     sid = models.IntegerField()
     name = models.CharField(max_length=256)
     star = models.CharField(max_length=256)
-    visibility = models.CharField(max_length=256)
+    visibility = models.CharField(max_length=256, choices=VISIBILITY)
     neighbors = models.ManyToManyField("self")
     tags = models.CharField(max_length=1024)
     coords = models.CharField(max_length=256)  # coords
