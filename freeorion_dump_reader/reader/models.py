@@ -37,34 +37,31 @@ class Planet(models.Model):
     name = models.CharField(max_length=256)
     size = models.CharField(max_length=256)  # Change to choices
     focus = models.CharField(max_length=256)
-    sid = models.IntegerField()
     owned = models.BooleanField()
     visibility = models.CharField(max_length=256)
     species = models.CharField(max_length=256)
     owner = models.CharField(max_length=256, null=True, blank=True)
     turn = models.ForeignKey(Turn)
+    sid = models.ForeignKey('System')
 
-    class meta:
+    class Meta:
         unique_together = (('pid', 'turn'),)
 
 
-#
-#
-# class SystemModel(Model):
-#     SECTION = 'systems'
-#     sid = NumberField()
-#     name = StringField()
-#     star = StringField()
-#     planets = ListField()
-#     visibility = StringField()
-#     neighbors = ListField()
-#     tags = ListField()
-#     coords = CoordinatesField()
-#     last_battle = TurnField()
-#     owner_tags = ListField()
-#
-#     def get_key(self):
-#         return self.sid
+class System(models.Model):
+    sid = models.IntegerField()
+    name = models.CharField(max_length=256)
+    star = models.CharField(max_length=256)
+    visibility = models.CharField(max_length=256)
+    neighbors = models.ManyToManyField("self")
+    tags = models.CharField(max_length=1024)
+    coords = models.CharField(max_length=256)  # coords
+    last_battle = models.IntegerField()
+    owner_tags = models.CharField(max_length=1024)
+    turn = models.ForeignKey(Turn)
+
+    class Meta:
+        unique_together = (('sid', 'turn'),)
 #
 #
 # class FleetModel(Model):

@@ -2,7 +2,7 @@ import json
 import os
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from reader.models import Turn, Planet, Game
+from reader.models import Turn, Planet, Game, System
 
 from django.views.generic import TemplateView, ListView, View
 from django.conf import settings
@@ -45,6 +45,24 @@ class ImportView(View):
             empire_id=empire_id,
             creation_date=date_from_id(creation_date))
 
+        with open(os.path.join(folder, 'systems')) as f:
+            for line in f:
+                data, items = json.loads(line)
+
+                turn, _ = Turn.objects.get_or_create(turn=data['turn'],
+                                                     turn_id=data['turn_id'],
+                                                     parent_id=data['parent_id'],
+                                                     game=game)
+                neighbors_dict = {}
+                systems = {}
+                for item in items:
+                    neighbors_dict[item['sid']] = item.pop('neighbors')
+                    item.pop('planets')  # TODO fix dumper
+                    system, _ = System.objects.get_or_create(turn=turn, **item)
+                    systems[item['sid']] = system
+                for sid, neighbors in neighbors_dict.items():
+                    for neighbor in neighbors:
+                        systems[sid].neighbors.add(systems[neighbor])
         with open(os.path.join(folder, 'planets')) as f:
             for line in f:
                 data, items = json.loads(line)
@@ -53,5 +71,6 @@ class ImportView(View):
                                                      turn_id=data['turn_id'],
                                                      game=game)
                 for item in items:
+                    item['sid'] = System.objects.get(turn=turn, sid=item['sid'])
                     Planet.objects.get_or_create(turn=turn, **item)
         return HttpResponseRedirect('/')
