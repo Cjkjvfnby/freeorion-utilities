@@ -2,7 +2,7 @@ import json
 import os
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from reader.models import Turn, Planet, Game, System
+from reader.models import Turn, Planet, Game, System, ResearchInfo, Research
 
 from django.views.generic import TemplateView, ListView, View
 from django.conf import settings
@@ -31,12 +31,57 @@ class ImportListView(TemplateView):
         return context
 
 
+def process_file(processor, game, name):
+    with open(name) as f:
+        for line in f:
+            data, items = json.loads(line)
+            turn, _ = Turn.objects.get_or_create(turn=data['turn'],
+                                                 turn_id=data['turn_id'],
+                                                 parent_id=data['parent_id'],
+                                                 game=game)
+
+            processor(game, turn, items)
+
+
+def process_research_info(game, turn, items):
+    item = items[0]
+    ResearchInfo.objects.get_or_create(game=game,
+                                       type=item['type'],
+                                       category=item['category'],
+                                       name=item['name'],
+                                       cost=item['cost'])
+
+
+def process_research(game, turn, items):
+    for item in items:
+        name = item.pop('name')
+        ri = ResearchInfo.objects.get(name=name, game=game)
+        Research.objects.get_or_create(turn=turn, research_info=ri, **item)
+
+
+def process_systems(game, turn, items):
+    neighbors_dict = {}
+    systems = {}
+    for item in items:
+        neighbors_dict[item['sid']] = item.pop('neighbors')
+        system, _ = System.objects.get_or_create(turn=turn, **item)
+        systems[item['sid']] = system
+    for sid, neighbors in neighbors_dict.items():
+        for neighbor in neighbors:
+            systems[sid].neighbors.add(systems[neighbor])
+
+
+def process_planets(game, turn, items):
+    for item in items:
+        item['sid'] = System.objects.get(turn=turn, sid=item['sid'])
+        Planet.objects.get_or_create(turn=turn, **item)
+
+
 class ImportView(View):
     @transaction.atomic
     def post(self, request):
         folder = request.POST['path']
         game_id = os.path.basename(folder)
-
         empire_id, creation_date, name = game_id.split('_', 2)
 
         game, _ = Game.objects.get_or_create(
@@ -45,32 +90,9 @@ class ImportView(View):
             empire_id=empire_id,
             creation_date=date_from_id(creation_date))
 
-        with open(os.path.join(folder, 'systems')) as f:
-            for line in f:
-                data, items = json.loads(line)
+        process_file(process_research_info, game, os.path.join(folder, 'research_info'))
+        process_file(process_research, game, os.path.join(folder, 'research'))
+        process_file(process_systems, game, os.path.join(folder, 'system'))
+        process_file(process_planets, game, os.path.join(folder, 'planet'))
 
-                turn, _ = Turn.objects.get_or_create(turn=data['turn'],
-                                                     turn_id=data['turn_id'],
-                                                     parent_id=data['parent_id'],
-                                                     game=game)
-                neighbors_dict = {}
-                systems = {}
-                for item in items:
-                    neighbors_dict[item['sid']] = item.pop('neighbors')
-                    item.pop('planets')  # TODO fix dumper
-                    system, _ = System.objects.get_or_create(turn=turn, **item)
-                    systems[item['sid']] = system
-                for sid, neighbors in neighbors_dict.items():
-                    for neighbor in neighbors:
-                        systems[sid].neighbors.add(systems[neighbor])
-        with open(os.path.join(folder, 'planets')) as f:
-            for line in f:
-                data, items = json.loads(line)
-                turn, _ = Turn.objects.get_or_create(turn=data['turn'],
-                                                     parent_id=data['parent_id'],
-                                                     turn_id=data['turn_id'],
-                                                     game=game)
-                for item in items:
-                    item['sid'] = System.objects.get(turn=turn, sid=item['sid'])
-                    Planet.objects.get_or_create(turn=turn, **item)
         return HttpResponseRedirect('/')

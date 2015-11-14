@@ -62,6 +62,31 @@ class System(models.Model):
 
     class Meta:
         unique_together = (('sid', 'turn'),)
+
+
+RESEARCH_TYPES = tuple((x, x) for x in ('application', 'theory', 'refinement'))
+RESEARCH_CATEGORIES = tuple((x, x) for x in ('CONSTRUCTION_CATEGORY', 'SPY_CATEGORY', 'PRODUCTION_CATEGORY', 'SHIPS_CATEGORY',
+                       'GROWTH_CATEGORY', 'DEFENSE_CATEGORY','LEARNING_CATEGORY'))
+
+
+class ResearchInfo(models.Model):
+    game = models.ForeignKey(Game)
+    category = models.CharField(choices=RESEARCH_CATEGORIES, max_length=256)
+    name = models.CharField(max_length=256)
+    cost = models.FloatField()
+    type = models.CharField(choices=RESEARCH_TYPES, max_length=256)
+
+    class Meta:
+        unique_together = ('game', 'name')
+
+
+class Research(models.Model):
+        allocation = models.CharField(max_length=256)
+        turn_left = models.IntegerField()
+        research_info = models.ForeignKey(ResearchInfo)
+
+        turn = models.ForeignKey(Turn)
+
 #
 #
 # class FleetModel(Model):
@@ -87,14 +112,4 @@ class System(models.Model):
 #         return '%s: %s' % (self.name, ', '.join('%s:%s' % x for x in sorted(self. args.items())))
 #
 #
-# class ResearchModel(Model):
-#     SECTION = 'research'
-#     name = StringField()
-#     category = StringField()
-#     allocation = StringField()
-#     cost = NumberField()
-#     turn_left = NumberField()
-#     type = StringField()
-#
-#     def get_key(self):
-#         return self.name
+
