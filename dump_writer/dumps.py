@@ -96,7 +96,7 @@ class Dumper(object):
 
 
 class DumpSystems(Dumper):
-    NAME = 'systems'
+    NAME = 'system'
 
     def get_items(self):
         return fo.getUniverse().systemIDs
@@ -129,7 +129,6 @@ class DumpSystems(Dumper):
             'sid': sid,
             'name': system.name,
             'star': system.starType.name,
-            'planets': list(system.planetIDs),
             'visibility': str(universe.getVisibility(sid, fo.empireID())),
             'neighbors': list(universe.getImmediateNeighbors(sid, fo.empireID())),
             'tags': list(system.tags),
@@ -139,8 +138,9 @@ class DumpSystems(Dumper):
         }
         return data
 
+
 class DumpPlanets(Dumper):
-    NAME = 'planets'
+    NAME = 'planet'
 
     def sort(self, collection):
         collection.sort(key=lambda x: x['pid'])
@@ -167,7 +167,7 @@ class DumpPlanets(Dumper):
 
 
 class DumpFleet(Dumper):
-    NAME = 'fleets'
+    NAME = 'fleet'
 
     def sort(self, collection):
         collection.sort(key=lambda x: x['fid'])
@@ -198,7 +198,7 @@ class DumpFleet(Dumper):
 
 
 class DumpOrders(Dumper):
-    NAME = 'orders'
+    NAME = 'order'
 
     def sort(self, collection):
         collection.sort(key=lambda x: x['id'])
@@ -216,6 +216,7 @@ class DumpOrders(Dumper):
             'args': args
         }
 
+
 class DumpResearch(Dumper):
     NAME = 'research'
 
@@ -228,28 +229,32 @@ class DumpResearch(Dumper):
     def construct_item(self, element):
         tech = fo.getTech(element.tech)
         return {
-            'category': tech.category,
-            'type': tech.type.name,
             'name': tech.name,
             'allocation': element.allocation,
-            'cost': tech.researchCost(fo.empireID()),
             'turn_left': element.turnsLeft
         }
 
-class DumpInfo(Dumper):
+
+class DumpResearchInfo(Dumper):
     """
     Dump various information once per game.
     """
-    NAME = 'info'
+    NAME = 'research_info'
 
     def sort(self, collection):
         pass
 
     def construct_item(self, item):
-        return item
+        tech = fo.getTech(item)
+        return {
+            'category': tech.category,
+            'type': tech.type.name,
+            'name': tech.name,
+            'cost': tech.researchCost(fo.empireID()),
+        }
 
     def get_items(self):
-        return [list(fo.techs())]
+        return list(fo.techs())
 
     def _dump(self, section, common_info, item_list):
         file_path = os.path.join(self.game_folder, section)
@@ -257,6 +262,7 @@ class DumpInfo(Dumper):
             with open(file_path, 'a') as f:
                 f.write(json.dumps([common_info, item_list]))
                 f.write('\n')
+
 
 def dump_data(result):
     empire = fo.getEmpire()
@@ -266,9 +272,8 @@ def dump_data(result):
         'parent_id': foAI.foAIstate.get_prev_turn_uid(),
         'turn': fo.currentTurn(),
     }
-    for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch, DumpSystems, DumpInfo):
+    for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch, DumpSystems, DumpResearchInfo):
         cls(uniq_key).dump(**data)
-
 
 
 def send_data(data):
@@ -279,7 +284,6 @@ def send_data(data):
     process = Popen(['python', 'F:/projects/freeorion/stub.py'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
     res = process.communicate("hello2")
     print '2', res
-
 
 
 from freeorion_debug.listeners import register_post_handler
