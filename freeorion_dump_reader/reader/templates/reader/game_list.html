@@ -10,8 +10,6 @@
     <h1>Games</h1>
     <a class="research_compare">Research compare</a>
     <ul>
-
-
         {% for game in object_list %}
         <p><span>{{game.empire_name}}<small> [{{game.game_id}}] </small><sup>{{game.creation_date}}</sup></span></p>
 
@@ -20,7 +18,7 @@
 
 
                     {% for end in game.get_ends %}
-                    <li>{{end}}</li>
+                    <li><a href="{% url 'branch' game=game.game_id turn=end.turn_id %}">{{end}}</a></li>
 
                     {% comment %}
                         <li>
