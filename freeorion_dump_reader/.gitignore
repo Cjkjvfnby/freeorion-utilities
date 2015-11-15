@@ -1,4 +1,5 @@
 dump_reader/db.sqlite3
 dump_reader/dump_reader/user_settings.py
+reader/migrations/
 
 
