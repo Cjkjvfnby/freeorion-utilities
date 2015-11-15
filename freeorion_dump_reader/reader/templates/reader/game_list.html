@@ -11,14 +11,11 @@
     <a class="research_compare">Research compare</a>
     <ul>
         {% for game in object_list %}
-        <p><span>{{game.empire_name}}<small> [{{game.game_id}}] </small><sup>{{game.creation_date}}</sup></span></p>
-
+        <p>{% game_label game %}</p>
             <li>
                 <ul>
-
-
                     {% for end in game.get_ends %}
-                    <li><a href="{% url 'branch' game_id=game.game_id turn_id=end.turn_id %}">{{end}}</a></li>
+                    <li><a href="{% url 'branch' game_id=game.game_id turn_id=end.turn_id %}">{% turn_label end %}</a></li>
 
                     {% comment %}
                         <li>
