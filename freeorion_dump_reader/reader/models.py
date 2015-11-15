@@ -18,6 +18,16 @@ class Game(models.Model):
         linked = set(x.parent_id for x in turns)
         return (x for x in turns if x.turn_id not in linked)
 
+    def get_branch(self, turn):
+        all_turns = Turn.objects.filter(turn__lte=turn.turn, game=self).order_by('-turn')
+        branch = [turn]
+        next_turn = turn.parent_id
+        for item in all_turns:
+            if item.turn_id == next_turn:
+                branch.append(item)
+                next_turn = item.parent_id
+        return reversed(branch)
+
 
 class Turn(models.Model):
     turn = models.IntegerField()

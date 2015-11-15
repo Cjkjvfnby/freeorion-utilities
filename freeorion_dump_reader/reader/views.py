@@ -33,14 +33,5 @@ class BranchView(TurenMixin):
     template_name = 'reader/branch.html'
 
     def prepare_context(self, **kwargs):
-        all_turns = Turn.objects.filter(turn__lte=self.turn.turn, game=self.game).order_by('-turn')
-        print len(all_turns)
-
-        branch = [self.turn]
-        next_turn = self.turn.parent_id
-        for item in all_turns:
-            if item.turn_id == next_turn:
-                branch.append(item)
-                next_turn = item.parent_id
-        kwargs['branch'] = reversed(branch)
+        kwargs['branch'] = self.game.get_branch(self.turn)
         return kwargs
