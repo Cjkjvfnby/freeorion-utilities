@@ -18,7 +18,7 @@
 
 
                     {% for end in game.get_ends %}
-                    <li><a href="{% url 'branch' game=game.game_id turn=end.turn_id %}">{{end}}</a></li>
+                    <li><a href="{% url 'branch' game_id=game.game_id turn_id=end.turn_id %}">{{end}}</a></li>
 
                     {% comment %}
                         <li>
