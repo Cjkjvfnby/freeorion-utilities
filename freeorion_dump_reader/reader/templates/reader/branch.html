@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load items_tags %}
+{% load staticfiles %}
+
+{% block title %}Games{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{game}}</h1>
+    {% for turn in branch %}
+    <p>{{ turn.turn }} {{ turn.turn_id }}</p>
+    {% endfor %}
+</div>
+{% endblock %}
