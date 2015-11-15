@@ -8,8 +8,7 @@
 <div id="content-main">
     <h1>{% game_label game %}</h1>
     {% for turn in branch %}
-
-    <p>{% turn_label turn %}</p>
+    <p>{% turn_label turn %} {% turn_links turn %}</p>
     {% endfor %}
 </div>
 {% endblock %}
