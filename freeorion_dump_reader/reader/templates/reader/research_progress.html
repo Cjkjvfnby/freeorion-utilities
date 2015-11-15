@@ -4,5 +4,33 @@
 
 {% block content %}
 {{ block.super }}
-It works!
+<div id="content-main">
+    <table class="table table-striped table-bordered table-hover table-condensed table-responsive">
+        <tr>
+            <th>Turn</th>
+            <th>Finished</th>
+            <th>Started</th>
+        </tr>
+
+        {% for turn, finished, started in progress %}
+        <tr>
+            <td>{{ turn }}</td>
+            <td>
+                {% if finished %}
+                    {% for ri in finished %}
+                        <div>{{ ri.name }}</div>
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td>
+                {% if started %}
+                    {% for ri in started %}
+                        <div>{{ ri.name }}</div>
+                    {% endfor %}
+            {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
 {% endblock %}

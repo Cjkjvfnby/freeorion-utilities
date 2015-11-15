@@ -1,4 +1,4 @@
-from reader.models import Game, Turn
+from reader.models import Game, Turn, Research
 
 from django.views.generic import TemplateView, ListView
 
@@ -41,5 +41,16 @@ class BranchProgressView(TurenMixin):
     template_name = 'reader/research_progress.html'
 
     def prepare_context(self, **kwargs):
-        branch = self.game.get_branch(self.turn)
+        turns = self.game.get_branch(self.turn)
+        research_in_progress = set()
+        kwargs['progress'] = []
+
+        for turn in turns:
+            researches = turn.research_set.all()
+            in_progress = set(x.research_info for x in researches)
+            finished_this_turn = research_in_progress - in_progress
+            added_this_turn = in_progress - research_in_progress
+            if finished_this_turn or added_this_turn:
+                kwargs['progress'].append((turn.turn, finished_this_turn, added_this_turn))
+            research_in_progress = in_progress
         return kwargs
