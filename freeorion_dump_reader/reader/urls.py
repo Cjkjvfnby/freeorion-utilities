@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^import_list/$', importing.ImportListView.as_view(), name='import_list'),
     url(r'^import/$', importing.ImportView.as_view(), name='import'),
     url(get_url(GAME, TURN), views.BranchView.as_view(), name='branch'),
+    url(get_url(GAME, TURN, 'research', 'progress'), views.BranchProgressView.as_view(), name='research_progress'),
     # url(r'^$', views.GamesList.as_view(), name='games'),
     # url(r'^research_compare$', views.ResearchCompare.as_view(), name='research_compare'),
     # # url(get_url(GAME, SECTION, TURN, '(?P<start>\d+)', '(?P<end>\d+)', 'plot.png'), views.plot, name='plot'),

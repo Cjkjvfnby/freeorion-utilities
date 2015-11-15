@@ -35,3 +35,11 @@ class BranchView(TurenMixin):
     def prepare_context(self, **kwargs):
         kwargs['branch'] = self.game.get_branch(self.turn)
         return kwargs
+
+
+class BranchProgressView(TurenMixin):
+    template_name = 'reader/research_progress.html'
+
+    def prepare_context(self, **kwargs):
+        branch = self.game.get_branch(self.turn)
+        return kwargs
