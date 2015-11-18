@@ -1,10 +1,11 @@
-{% extends "summary.html" %}
+{% extends "base.html" %}
 
-{% block title %}Game {{ game }}{% endblock %}
+{% block title %}{{ game }}{% endblock %}
 
 {% block content %}
 {{ block.super }}
 <div id="content-main">
+    <h3>Research progress.</h3>
     <table class="table table-striped table-bordered table-hover table-condensed table-responsive">
         <tr>
             <th>Turn</th>
