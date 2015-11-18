@@ -7,8 +7,13 @@ from django.views.generic import TemplateView, ListView, DetailView
 class GameListView(ListView):
     model = Game
 
-
 class GameMixin(TemplateView):
+    def get_template_names(self):
+        templates = super(GameMixin, self).get_template_names()
+        if 'md' in self.request.GET:
+            templates.insert(0, templates[0].replace('.html', '.md'))
+        return templates
+
     def get_context_data(self, **kwargs):
         self.game = Game.objects.get(game_id=kwargs['game_id'])
         kwargs['game'] = self.game
@@ -16,14 +21,14 @@ class GameMixin(TemplateView):
         return super(GameMixin, self).get_context_data(**kwargs)
 
 
-class TurenMixin(GameMixin):
+class TurnMixin(GameMixin):
     def get_context_data(self, **kwargs):
         self.turn = Turn.objects.get(turn_id=kwargs['turn_id'])
         kwargs['turn'] = self.turn
-        return super(TurenMixin, self).get_context_data(**kwargs)
+        return super(TurnMixin, self).get_context_data(**kwargs)
 
 
-class BranchView(TurenMixin):
+class BranchView(TurnMixin):
     template_name = 'reader/branch.html'
 
     def prepare_context(self, **kwargs):
@@ -31,10 +36,11 @@ class BranchView(TurenMixin):
         return kwargs
 
 
-class BranchProgressView(TurenMixin):
+class BranchProgressView(TurnMixin):
     template_name = 'reader/research_progress.html'
 
     def prepare_context(self, **kwargs):
+
         turns = self.game.get_branch(self.turn)
         research_in_progress = set()
         kwargs['progress'] = []
