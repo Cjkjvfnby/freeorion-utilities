@@ -18,14 +18,14 @@
             <td>
                 {% if finished %}
                     {% for ri in finished %}
-                        <div>{{ ri.name }}</div>
+                        <div><a href="{% url 'research_info' game_id=game.game_id research=ri.name %}"*>{{ ri.get_icon|safe }} {{ ri.name }}</a></div>
                     {% endfor %}
                 {% endif %}
             </td>
             <td>
                 {% if started %}
                     {% for ri in started %}
-                        <div>{{ ri.name }}</div>
+                        <div><a href="{% url 'research_info' game_id=game.game_id research=ri.name %}"*>{{ ri.get_icon|safe }} {{ ri.name }}</a></div>
                     {% endfor %}
             {% endif %}
             </td>

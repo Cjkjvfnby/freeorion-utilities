@@ -42,7 +42,6 @@ REST_FRAMEWORK = {
 
 
 MIDDLEWARE_CLASSES = (
-
     'django.middleware.common.CommonMiddleware',
 )
 

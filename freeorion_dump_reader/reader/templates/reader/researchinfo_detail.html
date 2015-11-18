@@ -1,0 +1,10 @@
+{% extends "summary.html" %}
+
+{% block title %}Game {{ game }}{% endblock %}
+
+{% block content %}
+{{ block.super }}
+<div id="content-main">
+   {{ object.get_icon|safe }}
+</div>
+{% endblock %}

@@ -1,17 +1,11 @@
-from reader.models import Game, Turn, Research
+from django.shortcuts import get_object_or_404
+from reader.models import Game, Turn, ResearchInfo
 
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, DetailView
 
 
 class GameListView(ListView):
     model = Game
-
-
-class ResearchInfo(TemplateView):
-    template_name = 'reader/research.html'
-
-    def get_context_data(self, **kwargs):
-        pass
 
 
 class GameMixin(TemplateView):
@@ -54,3 +48,12 @@ class BranchProgressView(TurenMixin):
                 kwargs['progress'].append((turn.turn, finished_this_turn, added_this_turn))
             research_in_progress = in_progress
         return kwargs
+
+
+class ResearchInfoModelView(DetailView):
+    def get_object(self, queryset=None):
+        game_id = self.kwargs['game_id']
+        research = self.kwargs['research']
+        return get_object_or_404(ResearchInfo, game_id=game_id, name=research)
+
+
