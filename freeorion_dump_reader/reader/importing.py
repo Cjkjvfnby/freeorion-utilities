@@ -79,6 +79,9 @@ def process_systems(game, turn, items):
 def process_planets(game, turn, items):
     for item in items:
         item['sid'] = System.objects.get(turn=turn, sid=item['sid'])
+        owner = item.pop('owner', None)
+        if owner:
+            item['empire'] = EmpireInfo.objects.get(game=game, empire_id=owner)
         Planet.objects.get_or_create(turn=turn, **item)
 
 
@@ -87,8 +90,12 @@ def process_fleets(game, turn, items):
     for item in items:
         target = item.pop('target', None)
         sid = item.pop('sid')
+        owner = item.pop('owner', -1)
+        if owner != -1:
+            item['empire'] = EmpireInfo.objects.get(game=game, empire_id=owner)
         if sid != -1:
             item['system'] = System.objects.get(turn=turn, sid=sid)
+
 
         fleet, _ = Fleet.objects.get_or_create(turn=turn, **item)
         if target:
@@ -107,8 +114,6 @@ class ImportView(View):
 
         game, _ = Game.objects.get_or_create(
             game_id=game_id,
-            empire_name=name,
-            empire_id=empire_id,
             creation_date=date_from_id(creation_date))
 
         process_file(process_research_info, game, os.path.join(folder, 'research_info'))

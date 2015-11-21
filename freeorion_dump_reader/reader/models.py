@@ -6,15 +6,17 @@ from django.conf import settings
 
 class Game(models.Model):
     game_id = models.CharField(max_length=256, primary_key=True)
-    empire_name = models.CharField(max_length=256)
     creation_date = models.DateTimeField()
-    empire_id = models.IntegerField()
 
     class Meta:
-        ordering = ['-creation_date', 'empire_name']
+        ordering = ['-creation_date', 'game_id']
 
     def __unicode__(self):
-        return 'Game(%s) at %s' % (self.empire_name, self.creation_date)
+        return 'Game(%s) at %s' % (self.empire.name, self.creation_date)
+
+    @property
+    def empire(self):
+        return self.empires.get(is_me=True)
 
     def get_ends(self):
         turns = self.turn_set.all()
@@ -53,7 +55,7 @@ class Planet(models.Model):
     owned = models.BooleanField()
     visibility = models.CharField(max_length=256)
     species = models.CharField(max_length=256)
-    owner = models.CharField(max_length=256, null=True, blank=True)
+    empire = models.ForeignKey('EmpireInfo', related_name='planets', null=True)
     turn = models.ForeignKey(Turn)
     sid = models.ForeignKey('System')
 
@@ -149,7 +151,7 @@ class ResearchInfo(models.Model):
     type = models.CharField(choices=RESEARCH_TYPES, max_length=256)
 
     class Meta:
-        unique_together = ('game', 'name')
+        unique_together = (('game', 'name'),)
 
     def get_icon(self):
         info = get_research_information(self.name)
@@ -165,14 +167,14 @@ class Research(models.Model):
     turn = models.ForeignKey(Turn)
 
     class Meta:
-        unique_together = ('turn', 'research_info')
+        unique_together = (('turn', 'research_info'),)
 
 
 class Fleet(models.Model):
     fid = models.IntegerField()
     name = models.CharField(max_length=256)
     system = models.ForeignKey(System, null=True)
-    owner = models.CharField(max_length=256)  # TODO Make empire model
+    empire = models.ForeignKey('EmpireInfo', related_name='fleets', null=True)  # TODO Make empire model
     visibility = models.CharField(max_length=256, choices=VISIBILITY)
     turn = models.ForeignKey(Turn)
 
@@ -184,7 +186,7 @@ class FleetTarget(models.Model):
     fleet = models.OneToOneField(Fleet, primary_key=True)
     mission_type = models.CharField(max_length=256)  # TODO use enum
     target_id = models.CharField(max_length=256)  # TODO make enum or ContentTypeKey
-    target_type = models.CharField(max_length=256)  # TODO remoe after all models will be in base
+    target_type = models.CharField(max_length=256)  # TODO remove after all models will be in base
     target_name = models.CharField(max_length=256)
 
 
@@ -196,9 +198,10 @@ class EmpireInfo(models.Model):
     rgba = models.CharField(max_length=256)
     name = models.CharField(max_length=256)
     is_me = models.BooleanField()
-    game = models.ForeignKey(Game)
+    game = models.ForeignKey(Game, related_name='empires')
 
-
+    class Meta:
+        unique_together = (('game', 'empire_id'),)
 
 #
 #
