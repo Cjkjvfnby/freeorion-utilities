@@ -13,12 +13,14 @@ class ImportListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(ImportListView, self).get_context_data(**kwargs)
+
         def is_dump(path):
             # TODO add check for name style
             return os.path.isdir(os.path.join(settings.DUMP_FOLDER, path))
 
-        games = sorted([os.path.join(settings.DUMP_FOLDER, path) for path in os.listdir(settings.DUMP_FOLDER) if is_dump(path)],
-                       key=os.path.getctime, reverse=True)
+        games = sorted(
+            [os.path.join(settings.DUMP_FOLDER, path) for path in os.listdir(settings.DUMP_FOLDER) if is_dump(path)],
+            key=os.path.getctime, reverse=True)
 
         ids = [os.path.basename(path) for path in games]
         present = Game.objects.all().in_bulk(ids)
@@ -26,7 +28,9 @@ class ImportListView(TemplateView):
         return context
 
 
-def process_file(processor, game, name):
+def process_file(processor, game, folder, name=None):
+    name = name or processor.__name__
+    name = os.path.join(folder, name)
     with open(name) as f:
         for line in f:
             data, items = json.loads(line)
@@ -38,7 +42,7 @@ def process_file(processor, game, name):
             processor(game, turn, items)
 
 
-def process_research_info(game, turn, items):
+def research_info(game, turn, items):
     for item in items:
         ResearchInfo.objects.get_or_create(game=game,
                                            type=item['type'],
@@ -47,7 +51,7 @@ def process_research_info(game, turn, items):
                                            cost=item['cost'])
 
 
-def process_empire_info(game, turn, items):
+def empire_info(game, turn, items):
     for item in items:
         rgba = '#%02X%02X%02X%02X' % tuple(item.pop('rgba'))
         this_empire = item.pop('current_empire')
@@ -57,14 +61,14 @@ def process_empire_info(game, turn, items):
                                          **item)
 
 
-def process_research(game, turn, items):
+def research(game, turn, items):
     for item in items:
         name = item.pop('name')
         ri = ResearchInfo.objects.get(name=name, game=game)
         Research.objects.get_or_create(turn=turn, research_info=ri, **item)
 
 
-def process_systems(game, turn, items):
+def system(game, turn, items):
     neighbors_dict = {}
     systems = {}
     for item in items:
@@ -76,7 +80,7 @@ def process_systems(game, turn, items):
             systems[sid].neighbors.add(systems[neighbor])
 
 
-def process_planets(game, turn, items):
+def planet(game, turn, items):
     for item in items:
         item['sid'] = System.objects.get(turn=turn, sid=item['sid'])
         owner = item.pop('owner', None)
@@ -85,8 +89,7 @@ def process_planets(game, turn, items):
         Planet.objects.get_or_create(turn=turn, **item)
 
 
-def process_fleets(game, turn, items):
-
+def fleet(game, turn, items):
     for item in items:
         target = item.pop('target', None)
         sid = item.pop('sid')
@@ -95,7 +98,6 @@ def process_fleets(game, turn, items):
             item['empire'] = EmpireInfo.objects.get(game=game, empire_id=owner)
         if sid != -1:
             item['system'] = System.objects.get(turn=turn, sid=sid)
-
 
         fleet, _ = Fleet.objects.get_or_create(turn=turn, **item)
         if target:
@@ -116,11 +118,16 @@ class ImportView(View):
             game_id=game_id,
             creation_date=date_from_id(creation_date))
 
-        process_file(process_research_info, game, os.path.join(folder, 'research_info'))
-        process_file(process_empire_info, game, os.path.join(folder, 'empire_info'))
-        process_file(process_research, game, os.path.join(folder, 'research'))
-        process_file(process_systems, game, os.path.join(folder, 'system'))
-        process_file(process_planets, game, os.path.join(folder, 'planet'))
-        process_file(process_fleets, game, os.path.join(folder, 'fleet'))
+        processors = (
+            research_info,
+            empire_info,
+            research,
+            system,
+            planet,
+            fleet,
+        )
+
+        for processor in processors:
+            process_file(processor, game, folder)
 
         return HttpResponseRedirect('/')
