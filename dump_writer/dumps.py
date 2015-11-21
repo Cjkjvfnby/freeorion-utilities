@@ -186,10 +186,8 @@ class DumpFleet(Dumper):
             'sid': fleet.systemID,
             'owner': fleet.owner,
             'visibility': str(universe.getVisibility(fid, fo.getEmpire().empireID)),
-            'ships': list(fleet.shipIDs),
         }
         if mission and mission.target:
-
             obj = mission.target.get_object()
             name = obj and obj.name or 'unknown'
             data['target'] = [AIFleetMissionType.name(mission.type), mission.target.id,
