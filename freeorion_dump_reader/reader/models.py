@@ -100,7 +100,7 @@ _research_cache = {}
 
 
 def rgb(red, green, blue, alpha=255):
-    return '#%x%x%x' % (red, green, blue)
+    return '#%02X%02X%02X' % (red, green, blue)
 
 
 _categories = {
@@ -186,6 +186,18 @@ class FleetTarget(models.Model):
     target_id = models.CharField(max_length=256)  # TODO make enum or ContentTypeKey
     target_type = models.CharField(max_length=256)  # TODO remoe after all models will be in base
     target_name = models.CharField(max_length=256)
+
+
+class EmpireInfo(models.Model):
+    """
+    Basic information about empire
+    """
+    empire_id = models.IntegerField()
+    rgba = models.CharField(max_length=256)
+    name = models.CharField(max_length=256)
+    is_me = models.BooleanField()
+    game = models.ForeignKey(Game)
+
 
 
 #

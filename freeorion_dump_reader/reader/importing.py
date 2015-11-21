@@ -2,8 +2,7 @@ import json
 import os
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget
-
+from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, EmpireInfo
 from django.views.generic import TemplateView, View
 from django.conf import settings
 from reader.tools import date_from_id
@@ -46,6 +45,16 @@ def process_research_info(game, turn, items):
                                            category=item['category'],
                                            name=item['name'],
                                            cost=item['cost'])
+
+
+def process_empire_info(game, turn, items):
+    for item in items:
+        rgba = '#%02X%02X%02X%02X' % tuple(item.pop('rgba'))
+        this_empire = item.pop('current_empire')
+        EmpireInfo.objects.get_or_create(game=game,
+                                         rgba=rgba,
+                                         is_me=this_empire == item['empire_id'],
+                                         **item)
 
 
 def process_research(game, turn, items):
@@ -103,6 +112,7 @@ class ImportView(View):
             creation_date=date_from_id(creation_date))
 
         process_file(process_research_info, game, os.path.join(folder, 'research_info'))
+        process_file(process_empire_info, game, os.path.join(folder, 'empire_info'))
         process_file(process_research, game, os.path.join(folder, 'research'))
         process_file(process_systems, game, os.path.join(folder, 'system'))
         process_file(process_planets, game, os.path.join(folder, 'planet'))
