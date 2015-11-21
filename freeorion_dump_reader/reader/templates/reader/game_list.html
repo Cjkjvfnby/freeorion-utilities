@@ -5,10 +5,8 @@
 
 {% block content %}
 <div id="content-main">
-    <a class="btn btn-info btn-xs" href="{% url 'import_list' %}">import</a>
-
     <h1>Games</h1>
-    <a class="research_compare">Research compare</a>
+    <div><a class="btn btn-info btn-xs" href="{% url 'import_list' %}">import</a></div>
     <ul>
         {% for game in object_list %}
         <p>{% game_label game %}</p>
