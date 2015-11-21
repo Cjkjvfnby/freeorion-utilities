@@ -74,7 +74,8 @@ class Dumper(object):
         raise NotImplementedError()
 
     def sort(self, collection):
-        raise NotImplementedError('Implement in children.')
+        """Sort collection in place"""
+        pass
 
     def _dump(self, section, common_info, item_list):
         """
@@ -235,12 +236,9 @@ class DumpResearch(Dumper):
 
 class DumpResearchInfo(Dumper):
     """
-    Dump various information once per game.
+    Dump research tree information once per game.
     """
     NAME = 'research_info'
-
-    def sort(self, collection):
-        pass
 
     def construct_item(self, item):
         tech = fo.getTech(item)
@@ -257,7 +255,35 @@ class DumpResearchInfo(Dumper):
     def _dump(self, section, common_info, item_list):
         file_path = os.path.join(self.game_folder, section)
         if not os.path.exists(file_path):
-            with open(file_path, 'a') as f:
+            with open(file_path, 'w') as f:
+                f.write(json.dumps([common_info, item_list]))
+                f.write('\n')
+
+
+class DumpEmpireInfo(Dumper):
+    """
+    Dump empire information once per game.
+    """
+    NAME = 'empire_info'
+
+    def construct_item(self, item):
+        empire = fo.getEmpire(item)
+
+        color = empire.colour
+        return {
+            'empire_id': empire.empireID,
+            'name': empire.name,
+            'rgba': (color.r, color.g, color.b, color.a),
+            'current_empire': fo.getEmpire().empireID
+        }
+
+    def get_items(self):
+        return list(fo.allEmpireIDs())
+
+    def _dump(self, section, common_info, item_list):
+        file_path = os.path.join(self.game_folder, section)
+        if not os.path.exists(file_path):
+            with open(file_path, 'w') as f:
                 f.write(json.dumps([common_info, item_list]))
                 f.write('\n')
 
@@ -270,18 +296,9 @@ def dump_data(result):
         'parent_id': foAI.foAIstate.get_prev_turn_uid(),
         'turn': fo.currentTurn(),
     }
-    for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch, DumpSystems, DumpResearchInfo):
+    for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch, DumpSystems, DumpResearchInfo, DumpEmpireInfo):
         cls(uniq_key).dump(**data)
 
-
-def send_data(data):
-    process = Popen(['python', 'F:/projects/freeorion/stub.py'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    res = process.communicate("hello")
-    print '1', res
-
-    process = Popen(['python', 'F:/projects/freeorion/stub.py'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    res = process.communicate("hello2")
-    print '2', res
 
 
 from freeorion_debug.listeners import register_post_handler
