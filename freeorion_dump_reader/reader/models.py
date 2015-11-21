@@ -195,7 +195,7 @@ class EmpireInfo(models.Model):
     Basic information about empire
     """
     empire_id = models.IntegerField()
-    rgba = models.CharField(max_length=256)
+    rgb = models.CharField(max_length=7)
     name = models.CharField(max_length=256)
     is_me = models.BooleanField()
     game = models.ForeignKey(Game, related_name='empires')
@@ -203,9 +203,7 @@ class EmpireInfo(models.Model):
     class Meta:
         unique_together = (('game', 'empire_id'),)
 
-    @property
-    def rgb(self):
-        return self.rgba[:-2]
+
 #
 #
 # class OrderModel(Model):
