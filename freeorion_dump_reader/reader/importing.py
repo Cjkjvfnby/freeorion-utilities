@@ -2,7 +2,7 @@ import json
 import os
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from reader.models import Turn, Planet, Game, System, ResearchInfo, Research
+from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget
 
 from django.views.generic import TemplateView, View
 from django.conf import settings
@@ -40,12 +40,12 @@ def process_file(processor, game, name):
 
 
 def process_research_info(game, turn, items):
-    item = items[0]
-    ResearchInfo.objects.get_or_create(game=game,
-                                       type=item['type'],
-                                       category=item['category'],
-                                       name=item['name'],
-                                       cost=item['cost'])
+    for item in items:
+        ResearchInfo.objects.get_or_create(game=game,
+                                           type=item['type'],
+                                           category=item['category'],
+                                           name=item['name'],
+                                           cost=item['cost'])
 
 
 def process_research(game, turn, items):
@@ -73,6 +73,22 @@ def process_planets(game, turn, items):
         Planet.objects.get_or_create(turn=turn, **item)
 
 
+def process_fleets(game, turn, items):
+
+    for item in items:
+        target = item.pop('target', None)
+        sid = item.pop('sid')
+        if sid != -1:
+            item['system'] = System.objects.get(turn=turn, sid=sid)
+
+        fleet, _ = Fleet.objects.get_or_create(turn=turn, **item)
+        if target:
+            mission_type, target_id, target_type, target_name = target
+            FleetTarget.objects.get_or_create(fleet=fleet, mission_type=mission_type,
+                                              target_id=target_id, target_type=target_type, target_name=target_name
+                                              )
+
+
 class ImportView(View):
     @transaction.atomic
     def post(self, request):
@@ -90,5 +106,6 @@ class ImportView(View):
         process_file(process_research, game, os.path.join(folder, 'research'))
         process_file(process_systems, game, os.path.join(folder, 'system'))
         process_file(process_planets, game, os.path.join(folder, 'planet'))
+        process_file(process_fleets, game, os.path.join(folder, 'fleet'))
 
         return HttpResponseRedirect('/')

@@ -162,23 +162,32 @@ class Research(models.Model):
     allocation = models.CharField(max_length=256)
     turn_left = models.IntegerField()
     research_info = models.ForeignKey(ResearchInfo)
-
     turn = models.ForeignKey(Turn)
 
-#
-#
-# class FleetModel(Model):
-#     SECTION = 'fleets'
-#     fid = NumberField()
-#     name = StringField()
-#     sid = NumberField()
-#     owner = OwnerField()
-#     visibility = StringField()
-#     ships = ListField()
-#     target = TargetField()
-#
-#     def get_key(self):
-#         return self.fid
+    class Meta:
+        unique_together = ('turn', 'research_info')
+
+
+class Fleet(models.Model):
+    fid = models.IntegerField()
+    name = models.CharField(max_length=256)
+    system = models.ForeignKey(System, null=True)
+    owner = models.CharField(max_length=256)  # TODO Make empire model
+    visibility = models.CharField(max_length=256, choices=VISIBILITY)
+    turn = models.ForeignKey(Turn)
+
+    class Meta:
+        unique_together = ('turn', 'fid')
+
+
+class FleetTarget(models.Model):
+    fleet = models.OneToOneField(Fleet, primary_key=True)
+    mission_type = models.CharField(max_length=256)  # TODO use enum
+    target_id = models.CharField(max_length=256)  # TODO make enum or ContentTypeKey
+    target_type = models.CharField(max_length=256)  # TODO remoe after all models will be in base
+    target_name = models.CharField(max_length=256)
+
+
 #
 #
 # class OrderModel(Model):
