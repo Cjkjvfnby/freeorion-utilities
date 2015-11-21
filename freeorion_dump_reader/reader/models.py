@@ -203,6 +203,9 @@ class EmpireInfo(models.Model):
     class Meta:
         unique_together = (('game', 'empire_id'),)
 
+    @property
+    def rgb(self):
+        return self.rgba[:-2]
 #
 #
 # class OrderModel(Model):

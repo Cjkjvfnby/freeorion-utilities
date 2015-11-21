@@ -6,8 +6,12 @@ register = template.Library()
 
 @register.simple_tag()
 def game_label(game):
-    return '<span>%s %s<small> [%s] </small><sup>%s</sup></span>' % (game.empire.name, game.empire.empire_id, game.game_id,
-                                                                     game.creation_date.strftime('%d %b, %H:%M'))
+    return ('<span>'
+            '<strong style="color: {game.empire.rgb};">{game.empire.name} {game.empire.empire_id}</strong>'
+            '<small> [{game.game_id}] </small>'
+            '<sup>{time}</sup>'
+            '</span>').format(game=game, time=game.creation_date.strftime('%d %b, %H:%M'))
+
 
 
 @register.simple_tag()
