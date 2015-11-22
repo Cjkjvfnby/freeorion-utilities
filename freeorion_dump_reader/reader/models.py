@@ -204,6 +204,48 @@ class EmpireInfo(models.Model):
         unique_together = (('game', 'empire_id'),)
 
 
+class ShipDesign(models.Model):
+    did = models.IntegerField()
+    name = models.CharField(max_length=256)
+    parts = models.CharField(max_length=1024)
+    description_key = models.CharField(max_length=256)
+    designed_on_turn = models.IntegerField()
+    structure = models.IntegerField()
+    shields = models.IntegerField()
+    starlane_speed = models.IntegerField()
+    hull = models.IntegerField()
+    defense = models.IntegerField()
+    attack_stats = models.CharField(max_length=256)
+
+    game = models.ForeignKey(Game)
+
+    class Meta:
+        unique_together = (('game', 'did'),)
+
+
+SHIP_ORDERS = tuple((x, x) for x in ('colonizing', 'invading', 'scrapping'))
+
+
+class Ship(models.Model):
+    shid = models.IntegerField()
+    name = models.CharField(max_length=256)
+    species = models.CharField(max_length=256)  # add new table
+    speed = models.IntegerField()
+    age_in_turns = models.IntegerField()
+
+    is_monster = models.BooleanField()
+    is_armed = models.BooleanField()
+    can_colonize = models.BooleanField()
+    can_invade = models.BooleanField()
+    can_bombard = models.BooleanField()
+    order = models.CharField(blank=True, null=True, choices=SHIP_ORDERS)
+
+    fleet = models.ForeignKey(Fleet)
+    design = models.ForeignKey(ShipDesign)
+
+    class Meta:
+        unique_together = (('game', 'shid'),)
+
 #
 #
 # class OrderModel(Model):
