@@ -167,6 +167,75 @@ class DumpPlanets(Dumper):
         return data
 
 
+class DumpShips(Dumper):
+    NAME = 'ship'
+
+    def sort(self, collection):
+        collection.sort(key=lambda x: x['pid'])
+
+    def get_items(self):
+        universe = fo.getUniverse()
+        return set(universe.shipIDs) - set(universe.destroyedObjectIDs(fo.getEmpire().empireID))
+
+    def construct_item(self, shid):
+        universe = fo.getUniverse()
+        ship = universe.getShip(shid)
+
+        if ship.orderedColonizePlanet:
+            order = 'colonizing'
+        elif ship.orderedInvadePlanet:
+            order = 'invading'
+        elif ship.orderedScrapped:
+            order = 'scrapping'
+        else:
+            order = None
+
+        data = {
+            'shid': shid,
+            'fleet_id': ship.fleetID,
+            'name': ship.name,
+            'species_name': ship.speciesName,
+            'speed': ship.speed,
+            'age_in_turns': ship.ageInTurns,
+            'is_monster': ship.isMonster,
+            'is_armed': ship.isArmed,
+            'can_colonize': ship.canColonize,
+            'can_invade': ship.canInvade,
+            'can_bombard': ship.canBombard,
+            'order': order,
+        }
+        return data
+
+
+class DumpShipDesign(Dumper):
+    NAME = 'design'
+
+    def sort(self, collection):
+        collection.sort(key=lambda x: x['did'])
+
+    def get_items(self):
+        empire = fo.getEmpire()
+        return empire.availableShipDesigns
+
+    def construct_item(self, did):
+        design = fo.getShipDesign(did)
+
+        data = {
+            'did': did,
+            'name': design.name,
+            'parts': list(design.parts),
+            'description_key': design.description(False),
+            'designed_on_turn': design.designedOnTurn,
+            'structure': design.structure,
+            'shields': design.shields,
+            'starlane_speed': design.starlaneSpeed,
+            'hull': design.hull,
+            'defense': design.defense,
+            'attack_stats': list(design.attackStats)
+        }
+        return data
+
+
 class DumpFleet(Dumper):
     NAME = 'fleet'
 
@@ -259,7 +328,6 @@ class DumpResearchInfo(Dumper):
                 f.write(json.dumps([common_info, item_list]))
                 f.write('\n')
 
-
 class DumpEmpireInfo(Dumper):
     """
     Dump empire information once per game.
@@ -296,7 +364,8 @@ def dump_data(result):
         'parent_id': foAI.foAIstate.get_prev_turn_uid(),
         'turn': fo.currentTurn(),
     }
-    for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch, DumpSystems, DumpResearchInfo, DumpEmpireInfo):
+    for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch,
+                DumpSystems, DumpResearchInfo, DumpEmpireInfo, DumpShips, DumpShipDesign):
         cls(uniq_key).dump(**data)
 
 
@@ -304,6 +373,6 @@ def dump_data(result):
 from freeorion_debug.listeners import register_post_handler
 register_post_handler('generateOrders', dump_data)
 
-print "You can find dumps in %s"  % os.path.join(os.path.dirname(__file__), 'dumps')
+print "You can find dumps in %s" % os.path.join(os.path.dirname(__file__), 'dumps')
 
 
