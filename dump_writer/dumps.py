@@ -166,20 +166,11 @@ class DumpShips(Dumper):
         universe = fo.getUniverse()
         ship = universe.getShip(shid)
 
-        if ship.orderedColonizePlanet:
-            order = 'colonizing'
-        elif ship.orderedInvadePlanet:
-            order = 'invading'
-        elif ship.orderedScrapped:
-            order = 'scrapping'
-        else:
-            order = None
-
         data = {
             'shid': shid,
             'fleet_id': ship.fleetID,
             'name': ship.name,
-            'species_name': ship.speciesName,
+            'species': ship.speciesName,
             'speed': ship.speed,
             'age_in_turns': ship.ageInTurns,
             'is_monster': ship.isMonster,
@@ -187,7 +178,10 @@ class DumpShips(Dumper):
             'can_colonize': ship.canColonize,
             'can_invade': ship.canInvade,
             'can_bombard': ship.canBombard,
-            'order': order,
+            'design_id': ship.designID,
+            'colonizing_planet': ship.orderedColonizePlanet,
+            'invading_planet': ship.orderedInvadePlanet,
+            'is_scrapping': ship.orderedScrapped,
         }
         return data
 
@@ -197,6 +191,7 @@ class DumpShipDesign(Dumper):
 
     def get_items(self):
         empire = fo.getEmpire()
+        # TODO add monster designs too
         return empire.availableShipDesigns
 
     def construct_item(self, did):
@@ -204,13 +199,13 @@ class DumpShipDesign(Dumper):
 
         data = {
             'did': did,
-            'name': design.name,
+            'name': design.name(False),
             'parts': list(design.parts),
             'description_key': design.description(False),
             'designed_on_turn': design.designedOnTurn,
             'structure': design.structure,
             'shields': design.shields,
-            'starlane_speed': design.starlaneSpeed,
+            'speed': design.speed,
             'hull': design.hull,
             'defense': design.defense,
             'attack_stats': list(design.attackStats)
@@ -301,6 +296,7 @@ class DumpResearchInfo(Dumper):
                 f.write(json.dumps([common_info, item_list]))
                 f.write('\n')
 
+
 class DumpEmpireInfo(Dumper):
     """
     Dump empire information once per game.
@@ -340,7 +336,6 @@ def dump_data(result):
     for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch,
                 DumpSystems, DumpResearchInfo, DumpEmpireInfo, DumpShips, DumpShipDesign):
         cls(uniq_key).dump(**data)
-
 
 
 from freeorion_debug.listeners import register_post_handler
