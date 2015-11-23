@@ -73,10 +73,6 @@ class Dumper(object):
     def construct_item(self, item):
         raise NotImplementedError()
 
-    def sort(self, collection):
-        """Sort collection in place"""
-        pass
-
     def _dump(self, section, common_info, item_list):
         """
         Add serialized values to file.
@@ -92,7 +88,6 @@ class Dumper(object):
         for item in self.get_items():
             data = self.construct_item(item)
             result.append(data)
-        self.sort(result)
         self._dump(self.NAME, kwargs, result)
 
 
@@ -101,9 +96,6 @@ class DumpSystems(Dumper):
 
     def get_items(self):
         return fo.getUniverse().systemIDs
-
-    def sort(self, collection):
-        collection.sort(key=lambda x: x['sid'])
 
     def construct_item(self, sid):
         universe = fo.getUniverse()
@@ -143,10 +135,6 @@ class DumpSystems(Dumper):
 class DumpPlanets(Dumper):
     NAME = 'planet'
 
-    def sort(self, collection):
-        collection.sort(key=lambda x: x['pid'])
-        collection.sort(key=lambda x: x['sid'])
-
     def get_items(self):
         return fo.getUniverse().planetIDs
 
@@ -169,9 +157,6 @@ class DumpPlanets(Dumper):
 
 class DumpShips(Dumper):
     NAME = 'ship'
-
-    def sort(self, collection):
-        collection.sort(key=lambda x: x['pid'])
 
     def get_items(self):
         universe = fo.getUniverse()
@@ -210,9 +195,6 @@ class DumpShips(Dumper):
 class DumpShipDesign(Dumper):
     NAME = 'design'
 
-    def sort(self, collection):
-        collection.sort(key=lambda x: x['did'])
-
     def get_items(self):
         empire = fo.getEmpire()
         return empire.availableShipDesigns
@@ -238,9 +220,6 @@ class DumpShipDesign(Dumper):
 
 class DumpFleet(Dumper):
     NAME = 'fleet'
-
-    def sort(self, collection):
-        collection.sort(key=lambda x: x['fid'])
 
     def get_items(self):
         universe = fo.getUniverse()
@@ -268,9 +247,6 @@ class DumpFleet(Dumper):
 class DumpOrders(Dumper):
     NAME = 'order'
 
-    def sort(self, collection):
-        collection.sort(key=lambda x: x['id'])
-
     def get_items(self):
         turn = fo.currentTurn()
         turn_orders = turn_dumps.get(turn, [])
@@ -287,9 +263,6 @@ class DumpOrders(Dumper):
 
 class DumpResearch(Dumper):
     NAME = 'research'
-
-    def sort(self, collection):
-        collection.sort(key=lambda x: x['name'])
 
     def get_items(self):
         return [element for element in fo.getEmpire().researchQueue]
