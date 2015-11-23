@@ -44,7 +44,7 @@ class Turn(models.Model):
         unique_together = (("game", "turn_id"),)
 
     def __unicode__(self):
-        return 'Turn %s' % self.turn
+        return 'Turn %s(%s)' % (self.turn, self.turn_id)
 
 
 class Planet(models.Model):
@@ -212,18 +212,15 @@ class ShipDesign(models.Model):
     designed_on_turn = models.IntegerField()
     structure = models.IntegerField()
     shields = models.IntegerField()
-    starlane_speed = models.IntegerField()
-    hull = models.IntegerField()
+    speed = models.IntegerField()
+    hull = models.CharField(max_length=256)
     defense = models.IntegerField()
     attack_stats = models.CharField(max_length=256)
 
-    game = models.ForeignKey(Game)
+    turn = models.ForeignKey(Turn)  # change to turn
 
     class Meta:
-        unique_together = (('game', 'did'),)
-
-
-SHIP_ORDERS = tuple((x, x) for x in ('colonizing', 'invading', 'scrapping'))
+        unique_together = (('turn', 'did'),)
 
 
 class Ship(models.Model):
@@ -238,13 +235,15 @@ class Ship(models.Model):
     can_colonize = models.BooleanField()
     can_invade = models.BooleanField()
     can_bombard = models.BooleanField()
-    order = models.CharField(blank=True, null=True, choices=SHIP_ORDERS)
 
+    colonizing_planet = models.IntegerField(help_text='have colonize order for planet')
+    invading_planet = models.IntegerField(help_text='have invide order for planet')
+    is_scrapping = models.BooleanField()
     fleet = models.ForeignKey(Fleet)
-    design = models.ForeignKey(ShipDesign)
+    design = models.ForeignKey(ShipDesign, null=True)  # Design ID can be null because monster fleet
 
     class Meta:
-        unique_together = (('game', 'shid'),)
+        unique_together = (('fleet', 'shid'),)
 
 #
 #

@@ -1,8 +1,11 @@
 import json
 import os
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, EmpireInfo
+from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, EmpireInfo, ShipDesign, \
+    Ship
 from django.views.generic import TemplateView, View
 from django.conf import settings
 from reader.tools import date_from_id
@@ -53,10 +56,10 @@ def research_info(game, turn, items):
 
 def empire_info(game, turn, items):
     for item in items:
-        rgba = '#%02X%02X%02X%02X' % tuple(item.pop('rgba'))
+        rgb = '#%02X%02X%02X' % tuple(item.pop('rgba'))[:-1]
         this_empire = item.pop('current_empire')
         EmpireInfo.objects.get_or_create(game=game,
-                                         rgba=rgba,
+                                         rgb=rgb,
                                          is_me=this_empire == item['empire_id'],
                                          **item)
 
@@ -107,6 +110,25 @@ def fleet(game, turn, items):
                                               )
 
 
+def design(game, turn, items):
+    for item in items:
+        item['attack_stats'] = ''.join(map(str, item['attack_stats']))
+        item['parts'] = ''.join(map(str, item['parts']))
+        ShipDesign.objects.get_or_create(turn=turn, **item)
+
+
+def ship(game, turn, items):
+    for item in items:
+        fleet_id = item.pop('fleet_id')
+        fleet = Fleet.objects.get(turn=turn, fid=fleet_id)
+        try:
+            item['design'] = ShipDesign.objects.get(turn=turn, did=item.pop('design_id'))
+
+        except ObjectDoesNotExist:
+            pass
+        Ship.objects.get_or_create(fleet=fleet, **item)
+
+
 class ImportView(View):
     @transaction.atomic
     def post(self, request):
@@ -124,7 +146,10 @@ class ImportView(View):
             research,
             system,
             planet,
+            design,
             fleet,
+            ship,
+
         )
 
         for processor in processors:
