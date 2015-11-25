@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, EmpireInfo, ShipDesign, \
-    Ship
+    Ship, Order
 from django.views.generic import TemplateView, View
 from django.conf import settings
 from reader.tools import date_from_id
@@ -129,6 +129,11 @@ def ship(game, turn, items):
         Ship.objects.get_or_create(fleet=fleet, **item)
 
 
+def order(game, turn, items):
+    for item in items:
+        Order.objects.get_or_create(turn=turn, **item)
+
+
 class ImportView(View):
     @transaction.atomic
     def post(self, request):
@@ -149,6 +154,7 @@ class ImportView(View):
             design,
             fleet,
             ship,
+            order,
 
         )
 

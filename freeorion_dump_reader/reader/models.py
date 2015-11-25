@@ -245,14 +245,9 @@ class Ship(models.Model):
     class Meta:
         unique_together = (('fleet', 'shid'),)
 
-#
-#
-# class OrderModel(Model):
-#     SECTION = 'orders'
-#     name = StringField()
-#     args = MapField()
-#
-#     def get_key(self):
-#         return '%s: %s' % (self.name, ', '.join('%s:%s' % x for x in sorted(self. args.items())))
-#
-#
+
+class Order(models.Model):
+    name = models.CharField(max_length=256)
+    args = models.CharField(max_length=4096)
+    turn = models.ForeignKey(Turn)
+

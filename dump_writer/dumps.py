@@ -244,13 +244,11 @@ class DumpOrders(Dumper):
 
     def get_items(self):
         turn = fo.currentTurn()
-        turn_orders = turn_dumps.get(turn, [])
-        return enumerate(turn_orders)
+        return turn_dumps.get(turn, [])
 
     def construct_item(self, order_pairs):
-        i, (name, args) = order_pairs
+        name, args = order_pairs
         return {
-            'id': '%s-%s' % (self.turn, i),
             'name': name,
             'args': args
         }
