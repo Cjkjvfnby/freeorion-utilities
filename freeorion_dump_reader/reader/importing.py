@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, EmpireInfo, ShipDesign, \
-    Ship, Order
+    Ship, Order, Part, Hull, Building
 from django.views.generic import TemplateView, View
 from django.conf import settings
 from reader.tools import date_from_id
@@ -134,6 +134,32 @@ def order(game, turn, items):
         Order.objects.get_or_create(turn=turn, **item)
 
 
+def process_turn(game, folder, name=None):
+    name = 'turn'
+    name = os.path.join(folder, name)
+    with open(name) as f:
+        for line in f:
+            data, items = json.loads(line)
+            item = items[0]
+            parts = item.pop('parts')
+            hulls = item.pop('hulls')
+            buildings = item.pop('buildings')
+            turn, created = Turn.objects.get_or_create(turn=data['turn'],
+                                                       turn_id=data['turn_id'],
+                                                       parent_id=data['parent_id'],
+                                                       game=game,
+                                                       **item
+                                                       )
+            # do it only once
+            if created:
+                for collection, model, field in (
+                        (parts, Part, turn.parts),
+                        (hulls, Hull, turn.hulls),
+                        (buildings, Building, turn.buildings)
+                ):
+                    field.add(*[model.objects.get_or_create(name=name)[0] for name in collection])
+
+
 class ImportView(View):
     @transaction.atomic
     def post(self, request):
@@ -144,7 +170,7 @@ class ImportView(View):
         game, _ = Game.objects.get_or_create(
             game_id=game_id,
             creation_date=date_from_id(creation_date))
-
+        process_turn(game, folder)
         processors = (
             research_info,
             empire_info,

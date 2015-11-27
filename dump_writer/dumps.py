@@ -95,6 +95,10 @@ class DumpSystems(Dumper):
     NAME = 'system'
 
     def get_items(self):
+        empire = fo.getEmpire()
+        self.explored_systems = frozenset(empire.exploredSystemIDs)
+        self.suppliable_systems = frozenset(empire.fleetSupplyableSystemIDs)
+        self.capital = empire.capitalID
         return fo.getUniverse().systemIDs
 
     def construct_item(self, sid):
@@ -127,7 +131,10 @@ class DumpSystems(Dumper):
             'tags': list(system.tags),
             'coords': (system.x, system.y),
             'last_battle': system.lastTurnBattleHere,
-            'owner_tags': list(owner_tags)
+            'owner_tags': list(owner_tags),
+            'supplied': sid in self.suppliable_systems,
+            'explored': sid in self.explored_systems,
+            'is_capital': sid == self.capital,
         }
         return data
 
@@ -239,6 +246,24 @@ class DumpFleet(Dumper):
         return data
 
 
+class DumpTurn(Dumper):
+    NAME = 'turn'
+
+    def get_items(self):
+        empire = fo.getEmpire()
+        stats = {
+            'buildings': list(empire.availableBuildingTypes),
+            'hulls': list(empire.availableShipHulls),
+            'parts': list(empire.availableShipParts),
+            'population': empire.population(),
+            'production': empire.productionPoints,
+        }
+        return [stats]
+
+    def construct_item(self, item):
+        return item
+
+
 class DumpOrders(Dumper):
     NAME = 'order'
 
@@ -332,7 +357,8 @@ def dump_data(result):
         'turn': fo.currentTurn(),
     }
     for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch,
-                DumpSystems, DumpResearchInfo, DumpEmpireInfo, DumpShips, DumpShipDesign):
+                DumpSystems, DumpResearchInfo, DumpEmpireInfo, DumpShips,
+                DumpShipDesign, DumpTurn):
         cls(uniq_key).dump(**data)
 
 
@@ -342,3 +368,7 @@ register_post_handler('generateOrders', dump_data)
 print "You can find dumps in %s" % os.path.join(os.path.dirname(__file__), 'dumps')
 
 
+# TODO lsit
+# 'production_queue': empire.productionQueue,
+# 'research_queue': empire.researchQueue,
+# add syplyranges to system

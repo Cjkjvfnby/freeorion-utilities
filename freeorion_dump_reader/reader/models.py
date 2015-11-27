@@ -34,11 +34,28 @@ class Game(models.Model):
         return reversed(branch)
 
 
+class Part(models.Model):
+    name = models.CharField(max_length=256, primary_key=True)
+
+
+class Hull(models.Model):
+    name = models.CharField(max_length=256, primary_key=True)
+
+
+class Building(models.Model):
+    name = models.CharField(max_length=256, primary_key=True)
+
+
 class Turn(models.Model):
     turn = models.IntegerField()
     game = models.ForeignKey(Game)
     turn_id = models.CharField(max_length=256)
     parent_id = models.CharField(max_length=256, blank=True, null=True)
+    production = models.FloatField()
+    population = models.FloatField()
+    parts = models.ManyToManyField(Part)
+    hulls = models.ManyToManyField(Hull)
+    buildings = models.ManyToManyField(Building)
 
     class Meta:
         unique_together = (("game", "turn_id"),)
@@ -77,6 +94,10 @@ class System(models.Model):
     last_battle = models.IntegerField()
     owner_tags = models.CharField(max_length=1024)
     turn = models.ForeignKey(Turn)
+    supplied = models.BooleanField()
+    explored = models.BooleanField()
+    is_capital = models.BooleanField()
+
 
     class Meta:
         unique_together = (('sid', 'turn'),)
