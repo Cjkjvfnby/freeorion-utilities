@@ -5,9 +5,11 @@ from . import importing
 
 SECTION = '(?P<section>\w+)'
 GAME = '(?P<game_id>\d+_[0-9a-f]+_\w+)'
+GAME1 = '(?P<game_id1>\d+_[0-9a-f]+_\w+)'
+GAME2 = '(?P<game_id2>\d+_[0-9a-f]+_\w+)'
 TURN = '(?P<turn_id>[0-9a-f]+)'
-TURN_1 = '(?P<turn1>[0-9a-f]+)'
-TURN_2 = '(?P<turn2>[0-9a-f]+)'
+TURN1 = '(?P<turn1>[0-9a-f]+)'
+TURN2 = '(?P<turn2>[0-9a-f]+)'
 
 
 def get_url(*items):
@@ -21,6 +23,7 @@ urlpatterns = [
     url(get_url(GAME, TURN), views.BranchView.as_view(), name='branch'),
     url(get_url(GAME, TURN, 'research', 'progress'), views.BranchProgressView.as_view(), name='research_progress'),
     url(get_url('info', GAME, 'research', '(?P<research>[A-Z_]+)'), views.ResearchInfoModelView.as_view(), name='research_info'),
+    url(get_url(GAME1, TURN1, GAME2, TURN2), views.TurnInfoView.as_view(), name='turn_info'),
     # url(r'^$', views.GamesList.as_view(), name='games'),
     # url(r'^research_compare$', views.ResearchCompare.as_view(), name='research_compare'),
     # # url(get_url(GAME, SECTION, TURN, '(?P<start>\d+)', '(?P<end>\d+)', 'plot.png'), views.plot, name='plot'),

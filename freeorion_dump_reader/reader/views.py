@@ -7,6 +7,7 @@ from django.views.generic import TemplateView, ListView, DetailView
 class GameListView(ListView):
     model = Game
 
+
 class GameMixin(TemplateView):
     def get_template_names(self):
         templates = super(GameMixin, self).get_template_names()
@@ -62,4 +63,31 @@ class ResearchInfoModelView(DetailView):
         research = self.kwargs['research']
         return get_object_or_404(ResearchInfo, game_id=game_id, name=research)
 
+
+class TurnInfoView(TemplateView):
+    template_name = 'reader/turn_info.html'
+
+    def get_turn(self, game, turn_id):
+        if turn_id == '0':
+            return Turn(
+                game=game,
+                turn_id='0',
+                parent_id='0',
+                turn=0,
+                production=0,
+                population=0
+            )
+        else:
+            return Turn.objects.get(game=game, turn_id=turn_id)
+
+    def get_context_data(self, **kwargs):
+        game_1 = Game.objects.get(game_id=kwargs['game_id1'])
+        game_2 = Game.objects.get(game_id=kwargs['game_id2'])
+        kwargs['game1'] = game_1
+        kwargs['game2'] = game_2
+        this = self.get_turn(game_1, kwargs['turn1'])
+        that = self.get_turn(game_2, kwargs['turn2'])
+        kwargs['this'] = this
+        kwargs['that'] = that
+        return super(TurnInfoView, self).get_context_data(**kwargs)
 
