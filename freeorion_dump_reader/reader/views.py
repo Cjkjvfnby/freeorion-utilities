@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+
+from reader.diff_tools import get_diff
 from reader.models import Game, Turn, ResearchInfo
 
 from django.views.generic import TemplateView, ListView, DetailView
@@ -89,5 +91,7 @@ class TurnInfoView(TemplateView):
         that = self.get_turn(game_2, kwargs['turn2'])
         kwargs['this'] = this
         kwargs['that'] = that
+
+        kwargs['compare'] = get_diff(this, that)
         return super(TurnInfoView, self).get_context_data(**kwargs)
 

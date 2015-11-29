@@ -73,14 +73,18 @@ class Planet(models.Model):
     visibility = models.CharField(max_length=256)
     species = models.CharField(max_length=256)
     empire = models.ForeignKey('EmpireInfo', related_name='planets', null=True)
-    turn = models.ForeignKey(Turn)
-    sid = models.ForeignKey('System')
+    turn = models.ForeignKey(Turn, related_name='planets')
+    sid = models.ForeignKey('System', related_name='planets')
 
     class Meta:
         unique_together = (('pid', 'turn'),)
 
 
-VISIBILITY = tuple((x, x) for x in ('partial', 'full', 'none'))
+VISIBILITY_PARTIAL = 'partial'
+VISIBILITY_FULL = 'full'
+VISIBILITY_NONE = 'none'
+
+VISIBILITY = tuple((x, x) for x in (VISIBILITY_FULL, VISIBILITY_PARTIAL, VISIBILITY_NONE))
 
 
 class System(models.Model):
@@ -93,11 +97,10 @@ class System(models.Model):
     coords = models.CharField(max_length=256)  # coords
     last_battle = models.IntegerField()
     owner_tags = models.CharField(max_length=1024)
-    turn = models.ForeignKey(Turn)
+    turn = models.ForeignKey(Turn, related_name='systems')
     supplied = models.BooleanField()
     explored = models.BooleanField()
     is_capital = models.BooleanField()
-
 
     class Meta:
         unique_together = (('sid', 'turn'),)
@@ -197,7 +200,7 @@ class Fleet(models.Model):
     system = models.ForeignKey(System, null=True)
     empire = models.ForeignKey('EmpireInfo', related_name='fleets', null=True)  # TODO Make empire model
     visibility = models.CharField(max_length=256, choices=VISIBILITY)
-    turn = models.ForeignKey(Turn)
+    turn = models.ForeignKey(Turn, related_name='fleets')
 
     class Meta:
         unique_together = ('turn', 'fid')
@@ -260,7 +263,7 @@ class Ship(models.Model):
     colonizing_planet = models.IntegerField(help_text='have colonize order for planet')
     invading_planet = models.IntegerField(help_text='have invide order for planet')
     is_scrapping = models.BooleanField()
-    fleet = models.ForeignKey(Fleet)
+    fleet = models.ForeignKey(Fleet, related_name='ships')
     design = models.ForeignKey(ShipDesign, null=True)  # Design ID can be null because monster fleet
 
     class Meta:
@@ -270,5 +273,5 @@ class Ship(models.Model):
 class Order(models.Model):
     name = models.CharField(max_length=256)
     args = models.CharField(max_length=4096)
-    turn = models.ForeignKey(Turn)
+    turn = models.ForeignKey(Turn, related_name='orders')
 
