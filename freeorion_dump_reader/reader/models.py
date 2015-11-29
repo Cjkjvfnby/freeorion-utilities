@@ -201,6 +201,7 @@ class Fleet(models.Model):
     empire = models.ForeignKey('EmpireInfo', related_name='fleets', null=True)  # TODO Make empire model
     visibility = models.CharField(max_length=256, choices=VISIBILITY)
     turn = models.ForeignKey(Turn, related_name='fleets')
+    is_destroyed = models.BooleanField()
 
     class Meta:
         unique_together = ('turn', 'fid')
@@ -265,6 +266,7 @@ class Ship(models.Model):
     is_scrapping = models.BooleanField()
     fleet = models.ForeignKey(Fleet, related_name='ships')
     design = models.ForeignKey(ShipDesign, null=True)  # Design ID can be null because monster fleet
+    is_destroyed = models.BooleanField()
 
     class Meta:
         unique_together = (('fleet', 'shid'),)

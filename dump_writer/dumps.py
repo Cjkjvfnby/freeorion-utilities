@@ -167,7 +167,8 @@ class DumpShips(Dumper):
 
     def get_items(self):
         universe = fo.getUniverse()
-        return set(universe.shipIDs) - set(universe.destroyedObjectIDs(fo.getEmpire().empireID))
+        self.destroyed = set(universe.destroyedObjectIDs(fo.getEmpire().empireID))
+        return universe.shipIDs
 
     def construct_item(self, shid):
         universe = fo.getUniverse()
@@ -189,6 +190,7 @@ class DumpShips(Dumper):
             'colonizing_planet': ship.orderedColonizePlanet,
             'invading_planet': ship.orderedInvadePlanet,
             'is_scrapping': ship.orderedScrapped,
+            'is_destroyed': shid in self.destroyed
         }
         return data
 
@@ -225,7 +227,8 @@ class DumpFleet(Dumper):
 
     def get_items(self):
         universe = fo.getUniverse()
-        return set(universe.fleetIDs) - set(universe.destroyedObjectIDs(fo.getEmpire().empireID))
+        self.destroyed = set(universe.destroyedObjectIDs(fo.getEmpire().empireID))
+        return set(universe.fleetIDs)
 
     def construct_item(self, fid):
         universe = fo.getUniverse()
@@ -237,6 +240,7 @@ class DumpFleet(Dumper):
             'sid': fleet.systemID,
             'owner': fleet.owner,
             'visibility': str(universe.getVisibility(fid, fo.getEmpire().empireID)),
+            'is_destroyed': fid in self.destroyed
         }
         if mission and mission.target:
             obj = mission.target.get_object()
