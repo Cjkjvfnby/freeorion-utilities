@@ -4,7 +4,7 @@ import os
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, EmpireInfo, ShipDesign, \
+from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, Empire, ShipDesign, \
     Ship, Order, Part, Hull, Building
 from django.views.generic import TemplateView, View
 from django.conf import settings
@@ -58,10 +58,16 @@ def empire_info(game, turn, items):
     for item in items:
         rgb = '#%02X%02X%02X' % tuple(item.pop('rgba'))[:-1]
         this_empire = item.pop('current_empire')
-        EmpireInfo.objects.get_or_create(game=game,
-                                         rgb=rgb,
-                                         is_me=this_empire == item['empire_id'],
-                                         **item)
+        Empire.objects.get_or_create(game=game,
+                                     rgb=rgb,
+                                     is_me=this_empire == item['empire_id'],
+                                     **item)
+    # Fake empire to hold monster and rebel fleets
+    Empire(game=game,
+           rgb='#FF0000',
+           is_me=False,
+           empire_id=-1,
+           name='Monsters and rebels').save()
 
 
 def research(game, turn, items):
@@ -88,19 +94,26 @@ def planet(game, turn, items):
         item['sid'] = System.objects.get(turn=turn, sid=item['sid'])
         owner = item.pop('owner', None)
         if owner:
-            item['empire'] = EmpireInfo.objects.get(game=game, empire_id=owner)
+            item['empire'] = Empire.objects.get(game=game, empire_id=owner)
         Planet.objects.get_or_create(turn=turn, **item)
 
 
 def fleet(game, turn, items):
+    dead_fleets = set()
     for item in items:
         target = item.pop('target', None)
         sid = item.pop('sid')
         owner = item.pop('owner', -1)
-        if owner != -1:
-            item['empire'] = EmpireInfo.objects.get(game=game, empire_id=owner)
+        item['empire'] = Empire.objects.get(game=game, empire_id=owner)
         if sid != -1:
             item['system'] = System.objects.get(turn=turn, sid=sid)
+
+        # dont load destroyed fleet more then once
+        is_destroyed = item['is_destroyed']
+        if is_destroyed in dead_fleets:
+            continue
+        else:
+            dead_fleets.add('is_destroyeds')
 
         fleet, _ = Fleet.objects.get_or_create(turn=turn, **item)
         if target:
@@ -118,7 +131,16 @@ def design(game, turn, items):
 
 
 def ship(game, turn, items):
+    dead_ships = set()
+
     for item in items:
+        # dont load destroyed ships more then once
+        is_destroyed = item['is_destroyed']
+        if is_destroyed in dead_ships:
+            continue
+        else:
+            dead_ships.add('is_destroyeds')
+
         fleet_id = item.pop('fleet_id')
         fleet = Fleet.objects.get(turn=turn, fid=fleet_id)
         try:

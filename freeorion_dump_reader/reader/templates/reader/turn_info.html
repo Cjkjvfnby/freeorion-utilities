@@ -8,12 +8,19 @@
 <div id="content-main">
    Compare {{this}} and {{that}}
    <table width="50%" class="table table-striped table-bordered table-hover table-condensed">
-      <tr>
-         <td width="20%">Field</td>
-         <td>Value</td>
-         <td>Changes</td>
+      <thead>
+       <tr>
+         <th width="20%">Field</th>
+         <th>Value</th>
+         <th>Changes</th>
       </tr>
-      {% for diff  in compare %}
+       </thead>
+       <tbody>
+      {% for name, group in compare %}
+      <tr>
+         <th colspan="3" class="info text-center">{{name|title}}</th>
+      </tr>
+      {% for diff  in group %}
       <tr>
          <td>{{diff.name|title}}</td>
          <td>{{diff.this}}</td>
@@ -27,6 +34,8 @@
          </td>
       </tr>
       {% endfor%}
+      {% endfor%}
+       </tbody>
    </table>
 </div>
 {% endblock %}

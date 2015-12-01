@@ -63,6 +63,12 @@ class Turn(models.Model):
     def __unicode__(self):
         return 'Turn %s(%s)' % (self.turn, self.turn_id)
 
+    def get_empire(self):
+        return self.game.empires.filter(is_me=True).get()
+
+    def get_monsters(self):
+        return self.game.empires.filter(empire_id=-1).get()
+
 
 class Planet(models.Model):
     pid = models.IntegerField()
@@ -72,7 +78,7 @@ class Planet(models.Model):
     owned = models.BooleanField()
     visibility = models.CharField(max_length=256)
     species = models.CharField(max_length=256)
-    empire = models.ForeignKey('EmpireInfo', related_name='planets', null=True)
+    empire = models.ForeignKey('Empire', related_name='planets', null=True)
     turn = models.ForeignKey(Turn, related_name='planets')
     sid = models.ForeignKey('System', related_name='planets')
 
@@ -198,7 +204,7 @@ class Fleet(models.Model):
     fid = models.IntegerField()
     name = models.CharField(max_length=256)
     system = models.ForeignKey(System, null=True)
-    empire = models.ForeignKey('EmpireInfo', related_name='fleets', null=True)  # TODO Make empire model
+    empire = models.ForeignKey('Empire', related_name='fleets')
     visibility = models.CharField(max_length=256, choices=VISIBILITY)
     turn = models.ForeignKey(Turn, related_name='fleets')
     is_destroyed = models.BooleanField()
@@ -215,7 +221,7 @@ class FleetTarget(models.Model):
     target_name = models.CharField(max_length=256)
 
 
-class EmpireInfo(models.Model):
+class Empire(models.Model):
     """
     Basic information about empire
     """
@@ -227,6 +233,9 @@ class EmpireInfo(models.Model):
 
     class Meta:
         unique_together = (('game', 'empire_id'),)
+
+    def __unicode__(self):
+        return 'Empire %s(%s)' % (self.name, self.empire_id)
 
 
 class ShipDesign(models.Model):
@@ -276,4 +285,3 @@ class Order(models.Model):
     name = models.CharField(max_length=256)
     args = models.CharField(max_length=4096)
     turn = models.ForeignKey(Turn, related_name='orders')
-
