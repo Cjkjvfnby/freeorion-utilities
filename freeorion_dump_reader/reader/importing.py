@@ -10,6 +10,9 @@ from django.views.generic import TemplateView, View
 from django.conf import settings
 from reader.tools import date_from_id
 
+dead_fleets = set()
+dead_ships = set()
+
 
 class ImportListView(TemplateView):
     template_name = "reader/import.html"
@@ -104,16 +107,16 @@ def fleet(game, turn, items):
         target = item.pop('target', None)
         sid = item.pop('sid')
         owner = item.pop('owner', -1)
+        # dont load destroyed fleet more then once
+        fid = item['fid']
+        if item['is_destroyed']:
+            if fid in dead_fleets:
+                continue
+            else:
+                dead_fleets.add(fid)
         item['empire'] = Empire.objects.get(game=game, empire_id=owner)
         if sid != -1:
             item['system'] = System.objects.get(turn=turn, sid=sid)
-
-        # dont load destroyed fleet more then once
-        is_destroyed = item['is_destroyed']
-        if is_destroyed in dead_fleets:
-            continue
-        else:
-            dead_fleets.add('is_destroyeds')
 
         fleet, _ = Fleet.objects.get_or_create(turn=turn, **item)
         if target:
@@ -131,16 +134,14 @@ def design(game, turn, items):
 
 
 def ship(game, turn, items):
-    dead_ships = set()
-
     for item in items:
         # dont load destroyed ships more then once
-        is_destroyed = item['is_destroyed']
-        if is_destroyed in dead_ships:
-            continue
-        else:
-            dead_ships.add('is_destroyeds')
-
+        shid = item['shid']
+        if item['is_destroyed']:
+            if shid in dead_ships:
+                continue
+            else:
+                dead_ships.add(shid)
         fleet_id = item.pop('fleet_id')
         fleet = Fleet.objects.get(turn=turn, fid=fleet_id)
         try:
@@ -203,7 +204,6 @@ class ImportView(View):
             fleet,
             ship,
             order,
-
         )
 
         for processor in processors:
