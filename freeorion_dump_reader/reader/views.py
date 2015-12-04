@@ -10,13 +10,15 @@ class GameListView(ListView):
     model = Game
 
 
-class GameMixin(TemplateView):
+class MdMixin(TemplateView):
     def get_template_names(self):
-        templates = super(GameMixin, self).get_template_names()
+        templates = super(MdMixin, self).get_template_names()
         if 'md' in self.request.GET:
             templates.insert(0, templates[0].replace('.html', '.md'))
         return templates
 
+
+class GameMixin(MdMixin):
     def get_context_data(self, **kwargs):
         self.game = Game.objects.get(game_id=kwargs['game_id'])
         kwargs['game'] = self.game
@@ -66,7 +68,7 @@ class ResearchInfoModelView(DetailView):
         return get_object_or_404(ResearchInfo, game_id=game_id, name=research)
 
 
-class TurnInfoView(TemplateView):
+class TurnInfoView(MdMixin):
     template_name = 'reader/turn_info.html'
 
     def get_turn(self, game, turn_id):
@@ -94,4 +96,3 @@ class TurnInfoView(TemplateView):
 
         kwargs['compare'] = get_diff(this, that)
         return super(TurnInfoView, self).get_context_data(**kwargs)
-

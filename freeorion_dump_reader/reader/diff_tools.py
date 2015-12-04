@@ -95,7 +95,7 @@ def get_diff(this, that):
                 number_diff('my ships',
                             Ship.objects.filter(fleet__turn=this, is_destroyed=False, fleet__empire=this_empire).count(),
                             Ship.objects.filter(fleet__turn=that, is_destroyed=False, fleet__empire=that_empire).count()),
-                number_diff('destroyed known',
+                number_diff('destroyed',
                             Ship.objects.filter(fleet__turn=this, is_destroyed=True, fleet__empire=this_empire).count(),
                             Ship.objects.filter(fleet__turn=that, is_destroyed=True, fleet__empire=that_empire).count()),
             ]
