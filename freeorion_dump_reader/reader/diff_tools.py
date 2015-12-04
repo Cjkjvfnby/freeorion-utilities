@@ -1,4 +1,6 @@
-from reader.models import VISIBILITY_PARTIAL, Planet
+from django.db.models import Avg, Count
+
+from reader.models import VISIBILITY_PARTIAL, Planet, Ship
 
 
 def formatter_species(name):
@@ -49,8 +51,6 @@ def get_diff(this, that):
         added, removed = first - second, second - first
         return Diff(name, _to_str(first), _to_str(second), _to_str(added), _to_str(removed), info=info)
 
-    for x in this.fleets.filter(is_destroyed=False):
-        print x.empire
     return [
         [
             'general',
@@ -75,12 +75,29 @@ def get_diff(this, that):
                 number_diff('my',
                             this.fleets.filter(is_destroyed=False, empire=this_empire).count(),
                             that.fleets.filter(is_destroyed=False, empire=that_empire).count()),
+                number_diff('avg ships in fleet',
+                            this.fleets.filter(is_destroyed=False, empire=this_empire).annotate(ships_count=Count('ships')).aggregate(Avg('ships_count'))['ships_count__avg'],
+                            that.fleets.filter(is_destroyed=False, empire=that_empire).annotate(ships_count=Count('ships')).aggregate(Avg('ships_count'))['ships_count__avg']),
                 number_diff('monster',
                             this.fleets.filter(is_destroyed=False, empire=this.get_monsters()).count(),
                             that.fleets.filter(is_destroyed=False, empire=that.get_monsters()).count()),
                 number_diff('destroyed this turn',
                             this.fleets.filter(is_destroyed=True, empire=this_empire).count(),
                             that.fleets.filter(is_destroyed=True, empire=that_empire).count()),
+            ]
+        ],
+        [
+            'ships',
+            [
+                number_diff('total known',
+                            Ship.objects.filter(fleet__turn=this).count(),
+                            Ship.objects.filter(fleet__turn=that).count()),
+                number_diff('my ships',
+                            Ship.objects.filter(fleet__turn=this, is_destroyed=False, fleet__empire=this_empire).count(),
+                            Ship.objects.filter(fleet__turn=that, is_destroyed=False, fleet__empire=that_empire).count()),
+                number_diff('destroyed known',
+                            Ship.objects.filter(fleet__turn=this, is_destroyed=True, fleet__empire=this_empire).count(),
+                            Ship.objects.filter(fleet__turn=that, is_destroyed=True, fleet__empire=that_empire).count()),
             ]
         ],
         [
