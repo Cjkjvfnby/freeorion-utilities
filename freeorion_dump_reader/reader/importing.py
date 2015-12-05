@@ -4,8 +4,8 @@ import os
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponseRedirect
-from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, Empire, ShipDesign, \
-    Ship, Order, Part, Hull, Building, Branch, ShipDesignInfo
+from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, Empire, Design, \
+    Ship, Order, Part, Hull, Building, Branch, DesignInfo
 from django.views.generic import TemplateView, View
 from django.conf import settings
 from reader.tools import date_from_id
@@ -127,15 +127,15 @@ def fleet(game, turn, items):
 def design_info(game, turn, items):
     for item in items:
         item['parts'] = ''.join(map(str, item['parts']))
-        ShipDesignInfo.objects.get_or_create(game=game, **item)
+        DesignInfo.objects.get_or_create(game=game, **item)
 
 
 def design(game, turn, items):
     for item in items:
         item['attack_stats'] = ''.join(map(str, item['attack_stats']))
         did = item.pop('did')
-        info = ShipDesignInfo.objects.get(game=game, did=did)
-        ShipDesign.objects.get_or_create(turn=turn, design_info=info, **item)
+        info = DesignInfo.objects.get(game=game, did=did)
+        Design.objects.get_or_create(turn=turn, design_info=info, **item)
 
 
 def ship(game, turn, items):
@@ -150,7 +150,7 @@ def ship(game, turn, items):
         fleet_id = item.pop('fleet_id')
         fleet = Fleet.objects.get(turn=turn, fid=fleet_id)
         try:
-            item['design'] = ShipDesign.objects.get(turn=turn, design_info__did=item.pop('design_id'))
+            item['design'] = Design.objects.get(turn=turn, design_info__did=item.pop('design_id'))
 
         except ObjectDoesNotExist:
             pass

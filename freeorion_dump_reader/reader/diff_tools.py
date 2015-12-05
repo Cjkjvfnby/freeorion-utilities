@@ -1,6 +1,6 @@
 from django.db.models import Avg, Count
 
-from reader.models import VISIBILITY_PARTIAL, Planet, Ship, ResearchInfo
+from reader.models import VISIBILITY_PARTIAL, Planet, Ship, ResearchInfo, DesignInfo, Design
 
 
 def formatter_species(name):
@@ -83,7 +83,8 @@ def get_diff(this, that):
                             that.fleets.filter(is_destroyed=False, empire=that_empire).count()),
                 number_diff('avg ships in fleet',
                             this.fleets.filter(is_destroyed=False, empire=this_empire).annotate(ships_count=Count('ships')).aggregate(Avg('ships_count'))['ships_count__avg'],
-                            that.fleets.filter(is_destroyed=False, empire=that_empire).annotate(ships_count=Count('ships')).aggregate(Avg('ships_count'))['ships_count__avg']),
+                            that.fleets.filter(is_destroyed=False, empire=that_empire).annotate(ships_count=Count('ships')).aggregate(Avg('ships_count'))['ships_count__avg'] or 0
+                            ),
                 number_diff('monster',
                             this.fleets.filter(is_destroyed=False, empire=this.get_monsters()).count(),
                             that.fleets.filter(is_destroyed=False, empire=that.get_monsters()).count()),
@@ -143,5 +144,16 @@ def get_diff(this, that):
                      'GROWTH_CATEGORY', 'DEFENSE_CATEGORY', 'LEARNING_CATEGORY')
 
             ],
+        ],
+        [
+            'designs',
+            [
+                number_diff('Total designs', DesignInfo.objects.filter(game=this.game).count(), DesignInfo.objects.filter(game=that.game).count()),
+                number_diff('Used designs',
+                            Design.objects.filter(turn=this).annotate(count=Count('ships')).filter(ships__gt=0).count(),
+                            Design.objects.filter(turn=that).annotate(count=Count('ships')).filter(ships__gt=0).count()
+                            ),
+            ]
+
         ]
     ]

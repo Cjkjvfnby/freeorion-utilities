@@ -229,7 +229,7 @@ class Empire(models.Model):
         return 'Empire %s(%s)' % (self.name, self.empire_id)
 
 
-class ShipDesignInfo(models.Model):
+class DesignInfo(models.Model):
     did = models.IntegerField()
     name = models.CharField(max_length=256)
     parts = models.CharField(max_length=1024)
@@ -246,14 +246,16 @@ class ShipDesignInfo(models.Model):
         unique_together = (('game', 'did'),)
 
 
-class ShipDesign(models.Model):
+class Design(models.Model):
     attack_stats = models.CharField(max_length=256)
-
-    design_info = models.ForeignKey(ShipDesignInfo)
+    design_info = models.ForeignKey(DesignInfo, related_name='designs')
     turn = models.ForeignKey(Turn, related_name='designs')
 
     class Meta:
         unique_together = (('turn', 'design_info'),)
+
+    def __repr__(self):
+        return 'Design(turn="%s", design_info__name="%s")' % (self.turn, self.design_info.name)
 
 
 class Ship(models.Model):
@@ -273,7 +275,7 @@ class Ship(models.Model):
     invading_planet = models.IntegerField(help_text='have invide order for planet')
     is_scrapping = models.BooleanField()
     fleet = models.ForeignKey(Fleet, related_name='ships')
-    design = models.ForeignKey(ShipDesign, null=True)  # Design ID can be null because monster fleet
+    design = models.ForeignKey(Design, null=True, related_name='ships')  # Design ID can be null because monster fleet
     is_destroyed = models.BooleanField()
 
     class Meta:
