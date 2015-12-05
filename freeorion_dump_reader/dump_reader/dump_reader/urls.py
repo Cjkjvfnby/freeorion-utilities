@@ -1,6 +1,7 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 
-urlpatterns = patterns('',
-    url(r'^', include('reader.urls')),
-)
+urlpatterns = [
+    url(r'^', include('reader.urls'))
+    ]
+
