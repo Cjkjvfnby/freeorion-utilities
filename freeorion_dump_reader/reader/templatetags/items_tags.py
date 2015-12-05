@@ -1,4 +1,6 @@
 from django import template
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from reader.models import Turn
 from reader.tools import date_from_id
@@ -9,16 +11,16 @@ register = template.Library()
 
 @register.simple_tag()
 def game_label(game):
-    return ('<span>'
-            '<strong style="color: {game.empire.rgb};">{game.empire.name} {game.empire.empire_id}</strong>'
-            '<small> [{game.game_id}] </small>'
-            '<sup>{time}</sup>'
-            '</span>').format(game=game, time=game.creation_date.strftime('%d %b, %H:%M'))
+    return mark_safe(('<span>'
+                      '<strong style="color: {game.empire.rgb};">{game.empire.name} {game.empire.empire_id}</strong>'
+                      '<small> [{game.game_id}] </small>'
+                      '<sup>{time}</sup>'
+                      '</span>').format(game=game, time=game.creation_date.strftime('%d %b, %H:%M')))
 
 
 @register.simple_tag()
 def turn_label(turn):
-    return '<span>Turn %s<small> [%s] </small><sup>%s</sup></span>' % (turn.turn,
+    return format_html('<span>Turn {}<small> [{}] </small><sup>{}</sup></span>', turn.turn,
                                                                        turn.turn_id,
                                                                        date_from_id(turn.turn_id).strftime('%d %b, %H:%M'))
 
@@ -41,4 +43,4 @@ def turn_links(turn):
     res.append(
         make_link_template('turn info', [turn.game.game_id, turn.turn_id, turn.game.game_id, previous_turn_id])
     )
-    return ' '.join(res)
+    return mark_safe(' '.join(res))
