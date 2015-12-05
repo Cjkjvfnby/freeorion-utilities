@@ -51,7 +51,7 @@ class BranchProgressView(TurnMixin):
         kwargs['progress'] = []
 
         for turn in turns:
-            researches = turn.research_set.all()
+            researches = turn.researches.all()
             in_progress = set(x.research_info for x in researches)
             finished_this_turn = research_in_progress - in_progress
             added_this_turn = in_progress - research_in_progress
