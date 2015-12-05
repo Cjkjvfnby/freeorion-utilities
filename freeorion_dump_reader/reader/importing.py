@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, Empire, ShipDesign, \
-    Ship, Order, Part, Hull, Building
+    Ship, Order, Part, Hull, Building, Branch
 from django.views.generic import TemplateView, View
 from django.conf import settings
 from reader.tools import date_from_id
@@ -183,6 +183,23 @@ def process_turn(game, folder, name=None):
                     field.add(*[model.objects.get_or_create(name=name)[0] for name in collection])
 
 
+def get_ends(game):
+        turns = game.turns.all()
+        linked = set(x.parent_id for x in turns)
+        return (x for x in turns if x.turn_id not in linked)
+
+
+def get_branch(game, turn):
+    all_turns = Turn.objects.filter(turn__lte=turn.turn, game=game).order_by('-turn')
+    branch = [turn]
+    next_turn = turn.parent_id
+    for item in all_turns:
+        if item.turn_id == next_turn:
+            branch.append(item)
+            next_turn = item.parent_id
+    return reversed(branch)
+
+
 class ImportView(View):
     @transaction.atomic
     def post(self, request):
@@ -194,6 +211,14 @@ class ImportView(View):
             game_id=game_id,
             creation_date=date_from_id(creation_date))
         process_turn(game, folder)
+
+        Branch.objects.filter(turns__game=game).delete()
+
+        for end in get_ends(game):
+            branch = Branch(turn=end)
+            branch.save()
+            branch.turns.add(*get_branch(game, end))
+
         processors = (
             research_info,
             empire_info,

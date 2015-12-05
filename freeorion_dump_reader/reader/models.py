@@ -19,19 +19,10 @@ class Game(models.Model):
         return self.empires.get(is_me=True)
 
     def get_ends(self):
-        turns = self.turn_set.all()
-        linked = set(x.parent_id for x in turns)
-        return (x for x in turns if x.turn_id not in linked)
+        return Branch.objects.filter(turn__game=self)
 
     def get_branch(self, turn):
-        all_turns = Turn.objects.filter(turn__lte=turn.turn, game=self).order_by('-turn')
-        branch = [turn]
-        next_turn = turn.parent_id
-        for item in all_turns:
-            if item.turn_id == next_turn:
-                branch.append(item)
-                next_turn = item.parent_id
-        return reversed(branch)
+        return Branch.objects.get(turn=turn).turns.order_by('id').all()
 
 
 class Part(models.Model):
@@ -48,7 +39,7 @@ class Building(models.Model):
 
 class Turn(models.Model):
     turn = models.IntegerField()
-    game = models.ForeignKey(Game)
+    game = models.ForeignKey(Game, related_name='turns')
     turn_id = models.CharField(max_length=256)
     parent_id = models.CharField(max_length=256, blank=True, null=True)
     production = models.FloatField()
@@ -285,3 +276,11 @@ class Order(models.Model):
     name = models.CharField(max_length=256)
     args = models.CharField(max_length=4096)
     turn = models.ForeignKey(Turn, related_name='orders')
+
+
+class Branch(models.Model):
+    turns = models.ManyToManyField(Turn, related_name='branches')
+    turn = models.ForeignKey(Turn, related_name='ends')
+
+    def __repr__(self):
+        return 'Branch(%s)' % self.turn

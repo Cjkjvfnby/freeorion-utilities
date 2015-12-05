@@ -13,7 +13,7 @@
             <li>
                 <ul>
                     {% for end in game.get_ends %}
-                    <li><a href="{% url 'branch' game_id=game.game_id turn_id=end.turn_id %}">{% turn_label end %}</a> {% turn_links end %}</li>
+                    <li><a href="{% url 'branch' game_id=game.game_id turn_id=end.turn.turn_id %}">{% turn_label end.turn %}</a> {% turn_links end.turn %}</li>
 
                     {% comment %}
                         <li>
