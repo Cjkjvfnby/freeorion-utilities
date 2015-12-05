@@ -22,8 +22,7 @@ class Game(models.Model):
         return Branch.objects.filter(turn__game=self)
 
     def get_branch(self, turn):
-        return Branch.objects.get(turn=turn).turns.order_by('id').all()
-
+        return turn.branches.first().turns.filter(turn__lte=turn.turn).order_by('id')
 
 class Part(models.Model):
     name = models.CharField(max_length=256, primary_key=True)
@@ -53,7 +52,6 @@ class Turn(models.Model):
 
     @classmethod
     def find_turn(cls, game_id, turn_id, decrement):
-
         base_turn = cls.objects.get(game__game_id=game_id, turn_id=turn_id)
         if decrement is None:
             return base_turn
