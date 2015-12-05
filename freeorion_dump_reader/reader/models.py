@@ -229,7 +229,7 @@ class Empire(models.Model):
         return 'Empire %s(%s)' % (self.name, self.empire_id)
 
 
-class ShipDesign(models.Model):
+class ShipDesignInfo(models.Model):
     did = models.IntegerField()
     name = models.CharField(max_length=256)
     parts = models.CharField(max_length=1024)
@@ -240,12 +240,20 @@ class ShipDesign(models.Model):
     speed = models.IntegerField()
     hull = models.CharField(max_length=256)
     defense = models.IntegerField()
-    attack_stats = models.CharField(max_length=256)
-
-    turn = models.ForeignKey(Turn)  # change to turn
+    game = models.ForeignKey(Game)
 
     class Meta:
-        unique_together = (('turn', 'did'),)
+        unique_together = (('game', 'did'),)
+
+
+class ShipDesign(models.Model):
+    attack_stats = models.CharField(max_length=256)
+
+    design_info = models.ForeignKey(ShipDesignInfo)
+    turn = models.ForeignKey(Turn, related_name='designs')
+
+    class Meta:
+        unique_together = (('turn', 'design_info'),)
 
 
 class Ship(models.Model):

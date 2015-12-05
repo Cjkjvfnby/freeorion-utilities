@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from reader.models import Turn, Planet, Game, System, ResearchInfo, Research, Fleet, FleetTarget, Empire, ShipDesign, \
-    Ship, Order, Part, Hull, Building, Branch
+    Ship, Order, Part, Hull, Building, Branch, ShipDesignInfo
 from django.views.generic import TemplateView, View
 from django.conf import settings
 from reader.tools import date_from_id
@@ -124,13 +124,18 @@ def fleet(game, turn, items):
             FleetTarget.objects.get_or_create(fleet=fleet, mission_type=mission_type,
                                               target_id=target_id, target_type=target_type, target_name=target_name
                                               )
+def design_info(game, turn, items):
+    for item in items:
+        item['parts'] = ''.join(map(str, item['parts']))
+        ShipDesignInfo.objects.get_or_create(game=game, **item)
 
 
 def design(game, turn, items):
     for item in items:
         item['attack_stats'] = ''.join(map(str, item['attack_stats']))
-        item['parts'] = ''.join(map(str, item['parts']))
-        ShipDesign.objects.get_or_create(turn=turn, **item)
+        did = item.pop('did')
+        info = ShipDesignInfo.objects.get(game=game, did=did)
+        ShipDesign.objects.get_or_create(turn=turn, design_info=info, **item)
 
 
 def ship(game, turn, items):
@@ -145,7 +150,7 @@ def ship(game, turn, items):
         fleet_id = item.pop('fleet_id')
         fleet = Fleet.objects.get(turn=turn, fid=fleet_id)
         try:
-            item['design'] = ShipDesign.objects.get(turn=turn, did=item.pop('design_id'))
+            item['design'] = ShipDesign.objects.get(turn=turn, design_info__did=item.pop('design_id'))
 
         except ObjectDoesNotExist:
             pass
@@ -221,6 +226,7 @@ class ImportView(View):
 
         processors = (
             research_info,
+            design_info,
             empire_info,
             research,
             system,
