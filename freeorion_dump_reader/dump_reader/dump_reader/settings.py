@@ -22,8 +22,6 @@ SECRET_KEY = 'b7etm355#tf7t#s$-%s%%gv3x%#$gd&ewkwoj2rr&mrhc35ris'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = True
-
 ALLOWED_HOSTS = []
 
 
@@ -79,6 +77,14 @@ USE_L10N = False
 
 USE_TZ = False
 
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'OPTIONS': {'debug': True}
+    },
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
