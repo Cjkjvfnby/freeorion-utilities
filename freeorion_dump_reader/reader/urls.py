@@ -3,13 +3,19 @@ from django.conf.urls import url
 from . import views
 from . import importing
 
+_GAME_TEMPLATE = '(?P<game_id{0}>\d+_[0-9a-f]+_\w+)'
+
 SECTION = '(?P<section>\w+)'
-GAME = '(?P<game_id>\d+_[0-9a-f]+_\w+)'
-GAME1 = '(?P<game_id1>\d+_[0-9a-f]+_\w+)'
-GAME2 = '(?P<game_id2>\d+_[0-9a-f]+_\w+)'
-TURN = '(?P<turn_id>[0-9a-f]+)-?(?P<decrement>\d+)?'
-TURN1 = '(?P<turn_id1>[0-9a-f]+)-?(?P<decrement1>\d+)?'
-TURN2 = '(?P<turn_id2>[0-9a-f]+)-?(?P<decrement2>\d+)?'
+_TURN_TEMPLATE = '(?P<turn_id{0}>[0-9a-f]+)-?(?P<decrement{0}>\d+)?'
+
+
+GAME = _GAME_TEMPLATE.format('')
+GAME1 = _GAME_TEMPLATE.format('1')
+GAME2 = _GAME_TEMPLATE.format('2')
+
+TURN = _TURN_TEMPLATE.format('')
+TURN1 = _TURN_TEMPLATE.format('1')
+TURN2 = _TURN_TEMPLATE.format('2')
 
 
 def get_url(*items):
