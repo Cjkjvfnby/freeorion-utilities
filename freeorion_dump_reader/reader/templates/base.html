@@ -11,23 +11,10 @@
 
 <!-- Container -->
 <div id="container" class="container-fluid">
-    <div id="header">
-        {% block nav-global %}{% endblock %}
-    </div>
-
-    {% comment %}
-    <nav class="navbar navbar-fixed-top">
-        <div class="breadcrumbs small">
-            {% block breadcrumbs %}<a href="{% url 'games' %}">Games</a> / {% endblock %}
-        </div>
-        <div class="container small">
-            {% block navbar%}{% endblock%}
-        </div>
-    </nav>
-    {% endcomment %}
-
-
-
+    <ol class="breadcrumb">
+      <li><a href="/">Games</a></li>
+      {% block nav-global %}{% endblock %}
+    </ol>
     <!-- Content -->
     <div id="content" class="{% block coltype %}colM{% endblock %}">
         {% block pretitle %}{% endblock %}
