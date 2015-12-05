@@ -184,8 +184,8 @@ class ResearchInfo(models.Model):
 class Research(models.Model):
     allocation = models.CharField(max_length=256)
     turn_left = models.IntegerField()
-    research_info = models.ForeignKey(ResearchInfo)
-    turn = models.ForeignKey(Turn)
+    research_info = models.ForeignKey(ResearchInfo, related_name='researches')
+    turn = models.ForeignKey(Turn, related_name='researches')
 
     class Meta:
         unique_together = (('turn', 'research_info'),)

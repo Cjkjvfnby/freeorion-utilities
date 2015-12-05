@@ -1,6 +1,6 @@
 from django.db.models import Avg, Count
 
-from reader.models import VISIBILITY_PARTIAL, Planet, Ship
+from reader.models import VISIBILITY_PARTIAL, Planet, Ship, ResearchInfo
 
 
 def formatter_species(name):
@@ -50,6 +50,12 @@ def get_diff(this, that):
 
         added, removed = first - second, second - first
         return Diff(name, _to_str(first), _to_str(second), _to_str(added), _to_str(removed), info=info)
+
+    this_branch = this.branches.first().turns.filter(turn__lte=this.turn).select_related()
+    that_branch = this.branches.first().turns.filter(turn__lte=this.turn).select_related()
+
+    this_researches = ResearchInfo.objects.filter(researches__turn__in=this_branch).distinct()
+    that_researches = ResearchInfo.objects.filter(researches__turn__in=that_branch).distinct()
 
     return [
         [
@@ -125,5 +131,17 @@ def get_diff(this, that):
                             Planet.objects.filter(turn=that, owned=True).count()
                             ),
             ]
+        ],
+        [
+            'research',
+            [
+                number_diff('total researched', this_researches.count(), that_researches.count()),
+
+            ] +
+            [
+                number_diff('category: %s' % cat[:-9], this_researches.filter(category=cat).count(), that_researches.filter(category=cat).count()) for cat in ('CONSTRUCTION_CATEGORY', 'SPY_CATEGORY', 'PRODUCTION_CATEGORY', 'SHIPS_CATEGORY',
+                     'GROWTH_CATEGORY', 'DEFENSE_CATEGORY', 'LEARNING_CATEGORY')
+
+            ],
         ]
     ]
