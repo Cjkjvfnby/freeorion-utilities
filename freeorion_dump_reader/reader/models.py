@@ -51,6 +51,17 @@ class Turn(models.Model):
     class Meta:
         unique_together = (("game", "turn_id"),)
 
+    @classmethod
+    def find_turn(cls, game_id, turn_id, decrement):
+
+        base_turn = cls.objects.get(game__game_id=game_id, turn_id=turn_id)
+        if decrement is None:
+            return base_turn
+        else:
+            decrement = int(decrement)
+            assert decrement >= 0, 'Decrement should be positive'
+            return base_turn.branches.first().turns.get(turn=base_turn.turn-decrement)
+
     def __unicode__(self):
         return 'Turn %s(%s)' % (self.turn, self.turn_id)
 

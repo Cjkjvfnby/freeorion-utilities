@@ -28,7 +28,7 @@ class GameMixin(MdMixin):
 
 class TurnMixin(GameMixin):
     def get_context_data(self, **kwargs):
-        self.turn = Turn.objects.get(turn_id=kwargs['turn_id'])
+        self.turn = Turn.find_turn(kwargs['game_id'], kwargs['turn_id'], kwargs['decrement'])
         kwargs['turn'] = self.turn
         return super(TurnMixin, self).get_context_data(**kwargs)
 
@@ -71,7 +71,7 @@ class ResearchInfoModelView(DetailView):
 class TurnInfoView(MdMixin):
     template_name = 'reader/turn_info.html'
 
-    def get_turn(self, game, turn_id):
+    def get_turn(self, game, turn_id, decrement):
         if turn_id == '0':
             return Turn(
                 game=game,
@@ -82,15 +82,15 @@ class TurnInfoView(MdMixin):
                 population=0
             )
         else:
-            return Turn.objects.get(game=game, turn_id=turn_id)
+            return Turn.find_turn(game.game_id, turn_id, decrement)
 
     def get_context_data(self, **kwargs):
         game_1 = Game.objects.get(game_id=kwargs['game_id1'])
         game_2 = Game.objects.get(game_id=kwargs['game_id2'])
         kwargs['game1'] = game_1
         kwargs['game2'] = game_2
-        this = self.get_turn(game_1, kwargs['turn1'])
-        that = self.get_turn(game_2, kwargs['turn2'])
+        this = self.get_turn(game_1, kwargs['turn1'], kwargs['decrement1'])
+        that = self.get_turn(game_2, kwargs['turn2'], kwargs['decrement2'])
         kwargs['this'] = this
         kwargs['that'] = that
 

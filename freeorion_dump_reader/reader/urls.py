@@ -7,9 +7,9 @@ SECTION = '(?P<section>\w+)'
 GAME = '(?P<game_id>\d+_[0-9a-f]+_\w+)'
 GAME1 = '(?P<game_id1>\d+_[0-9a-f]+_\w+)'
 GAME2 = '(?P<game_id2>\d+_[0-9a-f]+_\w+)'
-TURN = '(?P<turn_id>[0-9a-f]+)'
-TURN1 = '(?P<turn1>[0-9a-f]+)'
-TURN2 = '(?P<turn2>[0-9a-f]+)'
+TURN = '(?P<turn_id>[0-9a-f]+)-?(?P<decrement>\d+)?'
+TURN1 = '(?P<turn1>[0-9a-f]+)-?(?P<decrement1>\d+)?'
+TURN2 = '(?P<turn2>[0-9a-f]+)-?(?P<decrement2>\d+)?'
 
 
 def get_url(*items):
