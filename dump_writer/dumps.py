@@ -195,6 +195,31 @@ class DumpShips(Dumper):
         return data
 
 
+class DumpShipDesignInfo(Dumper):
+    NAME = 'design_info'
+
+    def get_items(self):
+        empire = fo.getEmpire()
+        # TODO add monster designs too
+        designs = [fo.getShipDesign(did) for did in empire.availableShipDesigns]
+        return [design for design in designs if self.turn == design.designedOnTurn or self.turn == 1]
+
+    def construct_item(self, design):
+        data = {
+            'did': design.id,
+            'name': design.name(False),
+            'parts': list(design.parts),
+            'description_key': design.description(False),
+            'designed_on_turn': design.designedOnTurn,
+            'structure': design.structure,
+            'shields': design.shields,
+            'speed': design.speed,
+            'hull': design.hull,
+            'defense': design.defense,
+        }
+        return data
+
+
 class DumpShipDesign(Dumper):
     NAME = 'design'
 
@@ -205,18 +230,8 @@ class DumpShipDesign(Dumper):
 
     def construct_item(self, did):
         design = fo.getShipDesign(did)
-
         data = {
             'did': did,
-            'name': design.name(False),
-            'parts': list(design.parts),
-            'description_key': design.description(False),
-            'designed_on_turn': design.designedOnTurn,
-            'structure': design.structure,
-            'shields': design.shields,
-            'speed': design.speed,
-            'hull': design.hull,
-            'defense': design.defense,
             'attack_stats': list(design.attackStats)
         }
         return data
@@ -362,7 +377,7 @@ def dump_data(result):
     }
     for cls in (DumpPlanets, DumpFleet, DumpOrders, DumpResearch,
                 DumpSystems, DumpResearchInfo, DumpEmpireInfo, DumpShips,
-                DumpShipDesign, DumpTurn):
+                DumpShipDesign, DumpTurn, DumpShipDesignInfo):
         cls(uniq_key).dump(**data)
 
 
