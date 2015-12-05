@@ -89,8 +89,8 @@ class TurnInfoView(MdMixin):
         game_2 = Game.objects.get(game_id=kwargs['game_id2'])
         kwargs['game1'] = game_1
         kwargs['game2'] = game_2
-        this = self.get_turn(game_1, kwargs['turn1'], kwargs['decrement1'])
-        that = self.get_turn(game_2, kwargs['turn2'], kwargs['decrement2'])
+        this = self.get_turn(game_1, kwargs['turn_id1'], kwargs['decrement1'])
+        that = self.get_turn(game_2, kwargs['turn_id2'], kwargs['decrement2'])
         kwargs['this'] = this
         kwargs['that'] = that
 

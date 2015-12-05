@@ -33,7 +33,7 @@
         <span class="h4" title="{{ turn.turn_id }}">Turn {{ turn.turn }} <small><u><em>{{ turn.turn_id}}</em></u> {{ turn.data|length }} items</small></span>
         {% if not forloop.first %}
             <a href="#{{ turn.parent_id }}" class="btn btn-info btn-xs">prev</a>
-            <a href="{% url 'diff' game=game.game_id section=section turn1=turn.parent_id turn2=turn.turn_id %}" class="btn btn-info btn-xs">diff with parent</a>
+            <a href="{% url 'diff' game=game.game_id section=section turn_id1=turn.parent_id turn_id2=turn.turn_id %}" class="btn btn-info btn-xs">diff with parent</a>
             <a href="{% url 'summary' game=game.game_id turn=turn.turn_id section=section %}?start={{1}}&end={{turn.turn}}" class="btn btn-info btn-xs">turn summary</a>
         {% endif %}
 
