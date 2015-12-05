@@ -2,13 +2,13 @@
 {% load items_tags %}
 {% load staticfiles %}
 
-{% block title %}Games{% endblock %}
+{% block title %}Branch{% endblock %}
 
 {% block content %}
 <div id="content-main">
     <h1>{% game_label game %}</h1>
     {% for turn in branch %}
-    <p>{% turn_label turn %} {% turn_links turn %} {% turn_info_link turn%}</p>
+        <p>{% turn_label turn %} {% turn_links turn %}</p>
     {% endfor %}
 </div>
 {% endblock %}

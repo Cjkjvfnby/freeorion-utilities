@@ -16,7 +16,6 @@ def game_label(game):
             '</span>').format(game=game, time=game.creation_date.strftime('%d %b, %H:%M'))
 
 
-
 @register.simple_tag()
 def turn_label(turn):
     return '<span>Turn %s<small> [%s] </small><sup>%s</sup></span>' % (turn.turn,
@@ -24,22 +23,22 @@ def turn_label(turn):
                                                                        date_from_id(turn.turn_id).strftime('%d %b, %H:%M'))
 
 
+def make_link_template(text, href):
+    href = map(str, href)
+    return '<a class="btn btn-xs btn-info" href="/{href}">{text}</a>'.format(text=text, href='/'.join(href))
+
+
 @register.simple_tag()
 def turn_links(turn):
-    return '<a href="/{turn.game.game_id}/{turn.turn_id}/research/progress">research_progress</a>'.format(turn=turn)
 
+    res = [make_link_template('research progress', [turn.game.game_id,  turn.turn_id, 'research', 'progress'])]
 
-@register.simple_tag()
-def turn_info_link(turn):
     try:
         previous_turn_id = Turn.objects.get(turn_id=turn.parent_id).turn_id
     except ObjectDoesNotExist:
         previous_turn_id = 0
 
-    return (
-        '<a '
-        'href="/{turn.game.game_id}/{turn.turn_id}/{turn.game.game_id}/{previous_turn_id}"'
-        '>'
-        'Turn info'
-        '</a>'
-    ).format(turn=turn, previous_turn_id=previous_turn_id)
+    res.append(
+        make_link_template('turn info', [turn.game.game_id, turn.turn_id, turn.game.game_id, previous_turn_id])
+    )
+    return ' '.join(res)
