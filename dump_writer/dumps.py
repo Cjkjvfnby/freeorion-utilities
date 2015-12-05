@@ -3,6 +3,7 @@ from subprocess import PIPE, Popen
 import sys
 import json
 from EnumsAI import AIFleetMissionType
+
 sys.path.append('c:/Python27/Lib/site-packages/')
 
 import freeOrionAIInterface as fo
@@ -18,43 +19,56 @@ Hack to dump orders
 turn_dumps = {}
 
 params = {
-  'issueScrapOrder': ['object id'],
-  'issueAggressionOrder': ['fid', 'aggressive'],
-  'issueBombardOrder': ['?', '?'],
-  'issueChangeFocusOrder': ['pid', 'focus'],
-  'issueChangeProductionQuantityOrder': ['queue index', 'new quantity', 'new blocksize'],
-  'issueColonizeOrder': ['sid', 'pid'],
-  'issueCreateShipDesignOrder': ['name', 'description', 'hull', 'partlist', 'icon', 'model', 'has translation'],
-  'issueDequeueProductionOrder': ['queue index'],
-  'issueDequeueTechOrder': ['tech'],
-  'issueEnqueueBuildingProductionOrder': ['building', 'pid'],
-  'issueEnqueueShipProductionOrder': ['ship', 'location'],
-  'issueEnqueueTechOrder': ['tech', 'queue index'],
-  'issueFleetMoveOrder': ['fid', 'sid'],
-  'issueFleetTransferOrder': ['sid', 'fid'],
-  'issueGiveObjectToEmpireOrder': ['?', '?'],
-  'issueInvadeOrder': ['sid', 'pid'],
-  'issueNewFleetOrder': ['name', 'sid'],
-  'issueRenameOrder': ['object id', 'name'],
-  'issueRequeueProductionOrder': ['old position', 'new position'],
+    'issueScrapOrder': ['object id'],
+    'issueAggressionOrder': ['fid', 'aggressive'],
+    'issueBombardOrder': ['?', '?'],
+    'issueChangeFocusOrder': ['pid', 'focus'],
+    'issueChangeProductionQuantityOrder': ['queue index', 'new quantity', 'new blocksize'],
+    'issueColonizeOrder': ['sid', 'pid'],
+    'issueCreateShipDesignOrder': ['name', 'description', 'hull', 'partlist', 'icon', 'model', 'has translation'],
+    'issueDequeueProductionOrder': ['queue index'],
+    'issueDequeueTechOrder': ['tech'],
+    'issueEnqueueBuildingProductionOrder': ['building', 'pid'],
+    'issueEnqueueShipProductionOrder': ['ship', 'location'],
+    'issueEnqueueTechOrder': ['tech', 'queue index'],
+    'issueFleetMoveOrder': ['fid', 'sid'],
+    'issueFleetTransferOrder': ['sid', 'fid'],
+    'issueGiveObjectToEmpireOrder': ['?', '?'],
+    'issueInvadeOrder': ['sid', 'pid'],
+    'issueNewFleetOrder': ['name', 'sid'],
+    'issueRenameOrder': ['object id', 'name'],
+    'issueRequeueProductionOrder': ['old position', 'new position'],
 }
 
 
 def dump_order(function):
     def wrapper(*args):
-        turn_dumps.setdefault(fo.currentTurn(), []).append((function.__name__[5:-5], dict(zip(params[function.__name__], args))))
+        turn_dumps.setdefault(fo.currentTurn(), []).append(
+            (function.__name__[5:-5], dict(zip(params[function.__name__], args))))
         return function(*args)
+
     return wrapper
+
 
 for name in dir(fo):
     if name.startswith('issue') and name.endswith('Order'):
         setattr(fo, name, dump_order(getattr(fo, name)))
 
-
 uid_time_format = '%y-%m-%d_%H-%M-%S%f'
 
 
 class Dumper(object):
+    """
+    Base dump class.
+    You need to implement two methods:
+     - `get_items` return list of any items
+     - `construct_item` applied to each item in `get_items` list and convert it to dict.
+    and set 'NAME'
+
+    As result you will have folder named as game.
+    File named as `NAME`
+    Each line in file represent turn dump in json format: [{<turn indfo>}, [<item>, ...]]
+    """
     NAME = None
 
     def __init__(self, uid):
@@ -196,6 +210,10 @@ class DumpShips(Dumper):
 
 
 class DumpShipDesignInfo(Dumper):
+    """
+    Dumps static information about design. This does not changed during turn.
+    """
+
     NAME = 'design_info'
 
     def get_items(self):
@@ -221,6 +239,10 @@ class DumpShipDesignInfo(Dumper):
 
 
 class DumpShipDesign(Dumper):
+    """
+    Dumps information about design that can be changed during turns.
+    """
+
     NAME = 'design'
 
     def get_items(self):
@@ -382,12 +404,13 @@ def dump_data(result):
 
 
 from freeorion_debug.listeners import register_post_handler
+
 register_post_handler('generateOrders', dump_data)
 
 print "You can find dumps in %s" % os.path.join(os.path.dirname(__file__), 'dumps')
 
 
-# TODO lsit
+# TODO list
 # 'production_queue': empire.productionQueue,
 # 'research_queue': empire.researchQueue,
-# add syplyranges to system
+# add supply ranges to system
