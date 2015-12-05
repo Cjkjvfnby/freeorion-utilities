@@ -1,3 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Research progress{% endblock %}
+{% block content %}
+{{ block.super }}
+<p>Markdown:</p>
 <pre>
 {% for turn, finished, started in progress %} - Turn {{ turn }}
 {% if started %}    - started
@@ -7,3 +13,4 @@
 {% endfor %}{% endif %}
 {% endfor %}
 </pre>
+{% endblock %}
