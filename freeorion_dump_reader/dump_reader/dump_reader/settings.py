@@ -47,23 +47,6 @@ ROOT_URLCONF = 'dump_reader.urls'
 
 WSGI_APPLICATION = 'dump_reader.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'freeorion',
-        # The following settings are not used with sqlite3:
-        'USER': 'freeorion',
-        'PASSWORD': 'freeorion',
-        'HOST': 'localhost',
-        'PORT': '5433',
-        'ATOMIC_REQUESTS': True
-    }
-}
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.7/topics/i18n/
 
